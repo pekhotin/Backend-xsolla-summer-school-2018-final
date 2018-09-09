@@ -45,23 +45,28 @@ $container['user.repository'] = function (ContainerInterface $c) use ($app) {
     return new UserRepository($c->get('db.config'));
 };
 
+//state
+$container['state.service'] = function (ContainerInterface $c) use ($app) {
+    return new StateService($c->get('state.repository'));
+};
+$container['state.repository'] = function (ContainerInterface $c) use ($app) {
+    return new StateRepository($c->get('db.config'));
+};
+
 //products
 $container['product.controller'] = function (ContainerInterface $c) use ($app) {
-    return new ProductController($app, $c->get('user.service'), $c->get('product.service'));
+    return new ProductController(
+        $app,
+        $c->get('user.service'),
+        $c->get('product.service'),
+        $c->get('state.service')
+    );
 };
 $container['product.service'] = function (ContainerInterface $c) use ($app) {
     return new ProductService($c->get('product.repository'));
 };
 $container['product.repository'] = function (ContainerInterface $c) use ($app) {
     return new ProductRepository($c->get('db.config'));
-};
-
-//product batch
-$container['productBatch.service'] = function (ContainerInterface $c) use ($app) {
-    return new StateService($c->get('productBatch.repository'));
-};
-$container['productBatch.repository'] = function (ContainerInterface $c) use ($app) {
-    return new StateRepository($c->get('db.config'));
 };
 
 //transaction
@@ -78,7 +83,7 @@ $container['warehouse.controller'] = function (ContainerInterface $c) use ($app)
         $app,
         $c->get('user.service'),
         $c->get('warehouse.service'),
-        $c->get('productBatch.service'),
+        $c->get('state.service'),
         $c->get('product.service'),
         $c->get('transaction.service')
     );

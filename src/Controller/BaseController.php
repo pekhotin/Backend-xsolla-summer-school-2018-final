@@ -74,6 +74,12 @@ abstract class BaseController
                     throw new \LogicException(__CLASS__ . " validateVar() {$var} is not email!");
                 }
                 return (string)$var;
+            case 'date':
+                $date = date_parse_from_format('Y-m-d', $var);
+                if(checkdate($date['month'], $date['day'], $date['year']) === false) {
+                    throw new \LogicException(__CLASS__ . " validateVar() {$var} is not date!");
+                }
+                return $var;
             default:
                 return null;
         }

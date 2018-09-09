@@ -130,12 +130,10 @@ class StateRepository extends AbstractRepository
     }
 
     /**
-     * @param int $warehouseId
-     * @param int $productId
-     * @param int $quantity
-     * @param int $newWarehouseId
-     *
-     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
+     * @param $warehouseId
+     * @param $productId
+     * @param $quantity
+     * @param $newWarehouseId
      */
     public function movementProducts($warehouseId, $productId, $quantity, $newWarehouseId)
     {
@@ -171,5 +169,132 @@ class StateRepository extends AbstractRepository
         }
 
         return $filling;
+    }
+
+    /**
+     * @param $warehouseId
+     *
+     * @return array
+     */
+    public function getResiduesByWarehouse($warehouseId)
+    {
+        $rows = $this->dbConnection->fetchAll(
+            'SELECT p.name, s1.productId, s1.quantity, p.price
+            FROM State AS s1
+            JOIN Products AS p ON p.id = s1.productId
+            WHERE warehouseId = ? AND date = (
+              SELECT MAX(s2.date)
+              FROM State AS s2
+              WHERE s1.productId = s2.productId AND warehouseId = ? 
+            )',
+            [
+                $warehouseId,
+                $warehouseId
+            ]
+        );
+
+        $products = [];
+
+        foreach ($rows as $row) {
+            $products[] = [
+                'productId' => $row['productId'],
+                'name' => $row['name'],
+                'quantity' => $row['quantity'],
+                'cost' => $row['price'] * $row['quantity']
+            ];
+        }
+        return $products;
+    }
+
+    /**
+     * @param $productId
+     *
+     * @return array
+     */
+    public function getResiduesByProduct($productId)
+    {
+        $rows = $this->dbConnection->fetchAll(
+            'SELECT s1.warehouseId, s1.quantity, p.price
+            FROM State AS s1
+            JOIN Products AS p ON p.id = s1.productId
+            WHERE s1.productId = ? AND date = (
+              SELECT MAX(s2.date)
+              FROM State AS s2
+              WHERE s1.productId = s2.productId 
+            )',
+            [$productId]
+        );
+
+        $products = [];
+
+        foreach ($rows as $row) {
+            $products[] = [
+                'warehouseId' => $row['warehouseId'],
+                'quantity' => $row['quantity'],
+                'cost' => $row['price'] * $row['quantity']
+            ];
+        }
+        return $products;
+    }
+
+    public function getResiduesByWarehouseForDate($warehouseId, $date)
+    {
+        $rows = $this->dbConnection->fetchAll(
+            'SELECT p.name, s1.productId, s1.quantity, p.price
+            FROM State AS s1
+            JOIN Products AS p ON p.id = s1.productId
+            WHERE warehouseId = ? AND date = (
+              SELECT MAX(s2.date)
+              FROM State AS s2
+              WHERE s1.productId = s2.productId AND s2.warehouseId = ? AND s2.date <= ?
+            )',
+            [
+                $warehouseId,
+                $warehouseId,
+                $date
+            ]
+        );
+
+        $products = [];
+
+        foreach ($rows as $row) {
+            $products[] = [
+                'productId' => $row['productId'],
+                'name' => $row['name'],
+                'quantity' => $row['quantity'],
+                'cost' => $row['price'] * $row['quantity']
+            ];
+        }
+        return $products;
+    }
+
+    public function getResiduesByProductForDate($productId, $date)
+    {
+        $rows = $this->dbConnection->fetchAll(
+            'SELECT s1.warehouseId, s1.quantity, p.price
+            FROM State AS s1
+            JOIN Products AS p ON p.id = s1.productId
+            WHERE s1.productId = ? AND date = (
+              SELECT MAX(s2.date)
+              FROM State AS s2
+              WHERE s1.productId = s2.productId AND s2.date <= ?
+            )',
+            [
+                $productId,
+                $date
+            ]
+        );
+
+        $products = [];
+
+        foreach ($rows as $row) {
+            $products[] = [
+                'warehouseId' => $row['warehouseId'],
+                'quantity' => $row['quantity'],
+                'cost' => $row['price'] * $row['quantity']
+            ];
+        }
+        return $products;
+
     }
 }

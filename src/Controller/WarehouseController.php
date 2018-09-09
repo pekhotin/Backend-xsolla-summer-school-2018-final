@@ -2,11 +2,12 @@
 
 namespace App\Controller;
 
-use App\Model\ProductBatch;
 use App\Model\Transaction;
-
 use App\Service\TransactionService;
-use App\Service\{UserService, WarehouseService, StateService, ProductService};
+use App\Service\UserService;
+use App\Service\WarehouseService;
+use App\Service\StateService;
+use App\Service\ProductService;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -431,8 +432,6 @@ class WarehouseController extends BaseController
      * @param $args
      *
      * @return Response
-     *
-     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
     public function movementProducts(Request $request, Response $response, $args)
     {
@@ -445,7 +444,7 @@ class WarehouseController extends BaseController
             $warehouseId = $this->validateVar(trim($args['id']), 'int');
             $productId = $this->validateVar(trim($bodyParams['productId']), 'int');
             $quantity = $this->validateVar(trim($bodyParams['quantity']), 'int');
-            $newWarehouseId = $this->validateVar(trim($args['warehouseId']), 'int');
+            $newWarehouseId = $this->validateVar(trim($bodyParams['warehouseId']), 'int');
 
             $product = $this->productService->getOne($productId, $this->user);
             $newWarehouse = $this->warehouseService->getOne($newWarehouseId, $this->user);
@@ -509,4 +508,74 @@ class WarehouseController extends BaseController
                 ->withHeader('Content-Type', 'application/json');
         }
     }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     *
+     * @return Response
+     */
+    public function getResidues(Request $request, Response $response, $args)
+    {
+        try {
+            $this->initUser($request);
+            $warehouseId = $this->validateVar(trim($args['id']), 'int');
+
+            if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' getResidues() warehouse with id ' . $warehouseId . ' not found!', 404);
+            }
+
+            $products = $this->stateService->getResiduesByWarehouse($warehouseId);
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json')
+                ->withJson($products);
+
+        } catch (\LogicException $exception) {
+
+            error_log($exception->getMessage());
+            $code = 400;
+
+            if ($exception->getCode() === 404) {
+                $code = 404;
+            }
+
+            return $response
+                ->withStatus($code)
+                ->withHeader('Content-Type', 'application/json');
+        }
+    }
+
+    public function getResiduesForDate(Request $request, Response $response, $args)
+    {
+        try {
+            $this->initUser($request);
+            $warehouseId = $this->validateVar(trim($args['id']), 'int');
+            $date = $this->validateVar(trim($args['date']), 'date');
+            if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' getResiduesForDate() warehouse with id ' . $warehouseId . ' not found!', 404);
+            }
+
+            $products = $this->stateService->getResiduesByWarehouseForDate($warehouseId, $date);
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json')
+                ->withJson($products);
+
+        } catch (\LogicException $exception) {
+
+            error_log($exception->getMessage());
+            $code = 400;
+
+            if ($exception->getCode() === 404) {
+                $code = 404;
+            }
+
+            return $response
+                ->withStatus($code)
+                ->withHeader('Content-Type', 'application/json');
+        }
+    }
+
 }

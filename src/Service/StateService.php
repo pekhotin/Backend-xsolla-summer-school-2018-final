@@ -44,12 +44,10 @@ class StateService
     }
 
     /**
-     * @param int $warehouseId
-     * @param int $productId
-     * @param int $quantity
-     * @param int $newWarehouseId
-     *
-     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
+     * @param $warehouseId
+     * @param $productId
+     * @param $quantity
+     * @param $newWarehouseId
      */
     public function movementProducts($warehouseId, $productId, $quantity, $newWarehouseId)
     {
@@ -75,5 +73,30 @@ class StateService
     public function quantityProductInWarehouse($warehouseId, $productId)
     {
         return $this->stateRepository->getLastQuantity($warehouseId, $productId);
+    }
+
+    /**
+     * @param $warehouseId
+     *
+     * @return array
+     */
+    public function getResiduesByWarehouse($warehouseId)
+    {
+        return $this->stateRepository->getResiduesByWarehouse($warehouseId);
+    }
+
+    public function getResiduesByWarehouseForDate($warehouseId, $date)
+    {
+        return $this->stateRepository->getResiduesByWarehouseForDate($warehouseId, $date);
+    }
+
+    public function getResiduesByProduct($productId)
+    {
+        return $this->stateRepository->getResiduesByProduct($productId);
+    }
+
+    public function getResiduesByProductForDate($productId, $date)
+    {
+        return $this->stateRepository->getResiduesByProductForDate($productId, $date);
     }
 }
