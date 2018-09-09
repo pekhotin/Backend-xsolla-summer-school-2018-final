@@ -12,14 +12,14 @@ class Transaction
     private $id;
 
     /**
-     * @var Warehouse
+     * @var int
      */
-    private $warehouse;
+    private $warehouseId;
 
     /**
-     * @var Product
+     * @var int
      */
-    private $product;
+    private $productId;
 
     /**
      * @var int
@@ -34,7 +34,7 @@ class Transaction
     /**
      * @var string
      */
-    private $date;
+    private $datetime;
 
     /**
      * @var string
@@ -50,25 +50,26 @@ class Transaction
      * Transaction constructor.
      *
      * @param int $id
-     * @param Warehouse $warehouse
-     * @param Product $product
+     * @param int $warehouseId
+     * @param int $productId
      * @param int $quantity
      * @param string $direction
-     * @param string $date
+     * @param string $datetime
      * @param string $sender
      * @param string $recipient
      */
-    public function __construct($id, $warehouse, $product, $quantity, $direction, $date, $sender, $recipient)
+    public function __construct($id, $warehouseId, $productId, $quantity, $direction, $datetime, $sender, $recipient)
     {
         $this->id = $id;
-        $this->warehouse = $warehouse;
-        $this->product = $product;
+        $this->warehouseId = $warehouseId;
+        $this->productId = $productId;
         $this->quantity = $quantity;
         $this->direction = $direction;
-        $this->date = $date;
-        $this->recipient = $recipient;
+        $this->datetime = $datetime;
         $this->sender = $sender;
+        $this->recipient = $recipient;
     }
+
 
     /**
      * @return int
@@ -153,14 +154,14 @@ class Transaction
     /**
      * @return string
      */
-    public function getDate()
+    public function getDatetime()
     {
-        return $this->date;
+        return $this->datetime;
     }
 
-    public function setDate($date)
+    public function setDate($datetime)
     {
-        $this->date = $date;
+        $this->datetime = $datetime;
     }
 
     /**
@@ -201,11 +202,11 @@ class Transaction
     public function getTransactionArray()
     {
         return [
-            'idWarehouse' => $this->warehouse->getId(),
-            'idProduct' => $this->product->getId(),
+            'warehouseId' => $this->warehouseId,
+            'productId' => $this->productId,
             'quantity' => $this->quantity,
             'direction' => $this->direction,
-            'date' => $this->date,
+            'datetime' => $this->datetime,
             'sender' => $this->sender,
             'recipient' => $this->recipient
         ];

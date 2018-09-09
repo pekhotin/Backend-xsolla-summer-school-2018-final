@@ -1,12 +1,5 @@
 <?php
 
-use \App\Controller\{
-    ProductController,
-	ProductBatchController,
-    WarehouseController,
-	StatisticsController
-};
-
 $app->group('/api/v1', function () use ($app) {
 
     $app->post('/users', 'user.controller:register');

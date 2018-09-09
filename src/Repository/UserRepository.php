@@ -8,46 +8,87 @@ use Doctrine\DBAL\Connection;
 class UserRepository extends AbstractRepository
 {
     /**
-     * @var string
-     */
-    private $tableName;
-
-    /**
-     * UserRepository constructor.
+     * @param $login
      *
-     * @param Connection $dbConnection
+     * @return User|null
      */
-    public function __construct(Connection $dbConnection)
-    {
-        parent::__construct($dbConnection);
-        $this->tableName = 'Users';
-    }
-
-    /**
-     * @param string $name
-     * @param string $surname
-     * @param string $organization
-     *
-     * @return User|bool
-     */
-    public function findByNameAndOrganisation($name, $surname, $organization)
+    public function findByLogin($login)
     {
         $row = $this->dbConnection->fetchAssoc(
-            'SELECT * FROM ' . $this->tableName . ' WHERE name = ? AND surname = ? AND organization = ?',
-            [$name, $surname, $organization]
+            'SELECT * FROM Users WHERE login = ?',
+            [$login]
         );
 
-        if ($row === null) {
-            return false;
+        if ($row === false) {
+            return null;
         }
 
         return new User(
             $row['id'],
+            $row['login'],
             $row['name'],
             $row['surname'],
+            $row['hash'],
             $row['organization'],
             $row['email'],
-            $row['password'],
+            $row['phoneNumber']
+        );
+    }
+
+    /**
+     * @param string $email
+     *
+     * @return User|null
+     */
+    public function findByEmail($email)
+    {
+        $row = $this->dbConnection->fetchAssoc(
+            'SELECT * FROM Users WHERE email = ?',
+            [$email]
+        );
+
+        if ($row === false) {
+            return null;
+        }
+
+        return new User(
+            $row['id'],
+            $row['login'],
+            $row['name'],
+            $row['surname'],
+            $row['hash'],
+            $row['organization'],
+            $row['email'],
+            $row['phoneNumber']
+        );
+    }
+
+    /**
+     * @param $name
+     * @param $surname
+     * @param $organization
+     *
+     * @return User|null
+     */
+    public function findByNameAndOrg($name, $surname, $organization)
+    {
+        $row = $this->dbConnection->fetchAssoc(
+            'SELECT * FROM Users WHERE name = ? AND surname = ? AND organization = ?',
+            [$name, $surname, $organization]
+        );
+
+        if ($row === false) {
+            return null;
+        }
+
+        return new User(
+            $row['id'],
+            $row['login'],
+            $row['name'],
+            $row['surname'],
+            $row['hash'],
+            $row['organization'],
+            $row['email'],
             $row['phoneNumber']
         );
     }
@@ -55,19 +96,20 @@ class UserRepository extends AbstractRepository
     /**
      * @param User $user
      */
-    public function insert(User $user)
+    public function insert($user)
     {
         $values = [
+            'login' => $user->getLogin(),
             'name' => $user->getName(),
             'surname' => $user->getSurname(),
+            'hash' => $user->getPasswordHash(),
             'organization' => $user->getOrganization(),
             'email' => $user->getEmail(),
-            'password' => $user->getPassword(),
             'phoneNumber' => $user->getPhoneNumber()
         ];
 
         $this->dbConnection->insert(
-            $this->tableName,
+            'Users',
             $values
         );
 

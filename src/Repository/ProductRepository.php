@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Model\Product;
+use App\Model\User;
 use Doctrine\DBAL\Connection;
 
 class ProductRepository extends AbstractRepository
@@ -25,20 +26,19 @@ class ProductRepository extends AbstractRepository
 
     /**
      * @param int $id
+     * @param User $user
      *
-     * @return Product
-     *
-     * @throws \LogicException
+     * @return Product|null
      */
-    public function findById($id)
+    public function findById($id, $user)
     {
         $row = $this->dbConnection->fetchAssoc(
-            'SELECT * FROM ' . $this->tableName . ' WHERE id = ?',
-            [$id]
+            'SELECT * FROM ' . $this->tableName . ' WHERE id = ? AND userId = ?',
+            [$id, $user->getId()]
         );
 
-        if ($row == null) {
-            throw new \LogicException(__CLASS__ . ' findById () product with id ' . $id . ' not found!', 404);
+        if ($row === false) {
+            return null;
         }
 
         return new Product(
@@ -52,18 +52,16 @@ class ProductRepository extends AbstractRepository
 
     /**
      * @param Product $product
-     *
-     * @return Product
-     *
-     * @throws \LogicException
+     * @param User $user
      */
-    public function insert(Product $product)
+    public function insert($product, $user)
     {
         $values = [
             'name' => $product->getName(),
             'price' => $product->getPrice(),
             'size' => $product->getSize(),
-            'type' => $product->getType()
+            'type' => $product->getType(),
+            'userId' => $user->getId()
         ];
 
         $this->dbConnection->insert(
@@ -72,36 +70,28 @@ class ProductRepository extends AbstractRepository
         );
 
         $product->setId($this->dbConnection->lastInsertId());
-
-        return $product;
     }
 
     /**
-     * @param Product $product
+     * @param $productId
      *
-     * @return Product
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \LogicException
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function delete(Product $product)
+    public function delete($productId)
     {
-        //проверка участвовал ли продукт в перемещениях
-
         $this->dbConnection->delete(
-            $this->tableName,
-            ['id' => $product->getId()]
+            'Products',
+            ['id' => $productId]
         );
-
-        return $product;
     }
 
     /**
      * @param Product $product
+     * @param User $user
      *
-     * @return Product
+     * @return Product|null
      */
-    public function update(Product $product)
+    public function update($product, $user)
     {
         $values = [];
 
@@ -114,7 +104,6 @@ class ProductRepository extends AbstractRepository
         }
 
         if($product->getSize() !== null) {
-            //участвовал ли продукт в перемещениях
             $values['size'] = $product->getSize();
         }
 
@@ -122,27 +111,28 @@ class ProductRepository extends AbstractRepository
             $values['type'] = $product->getType();
         }
 
-        if(count($values) == 0) {
-            throw new \LogicException(__CLASS__ . " update() enter parameters you want to update!");
-        }
-
         $this->dbConnection->update(
-            $this->tableName,
+            'Products',
             $values,
-            ['id' => $product->getId()]
+            [
+                'id' => $product->getId(),
+                'userId' => $user->getId()
+            ]
         );
 
-        return $this->findById($product->getId());
+        return $this->findById($product->getId(), $user);
     }
 
     /**
+     * @param User $user
      * @return Product[]
      */
-    public function getAll()
+    public function getAll($user)
     {
-        $rows = $this->dbConnection->fetchAll('SELECT * FROM ' . $this->tableName);
-
-        //здесь будет проверка
+        $rows = $this->dbConnection->fetchAll(
+            'SELECT * FROM Products WHERE userId = ?',
+            [$user->getId()]
+        );
 
         $products = [];
 

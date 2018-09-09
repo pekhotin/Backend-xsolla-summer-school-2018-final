@@ -1,26 +1,28 @@
 <?php
 
 use \Psr\Container\ContainerInterface;
+
 use \App\Controller\{
 	ProductController,
     WarehouseController,
     UserController
 };
-//лучше много юзов
+
 use App\Service\{
     ConnectionFactory,
     WarehouseService,
     ProductService,
     UserService,
-    ProductBatchService,
-    TransactionService
+    StateService,
+    TransactionService,
+    AuthenticationFactory
 };
 
 use App\Repository\{
     WarehouseRepository,
     ProductRepository,
     UserRepository,
-    ProductBatchRepository,
+    StateRepository,
     TransactionRepository
 };
 
@@ -29,6 +31,8 @@ $container = $app->getContainer();
 $container['db.config'] = function (ContainerInterface $c) {
     return ConnectionFactory::getConnection();
 };
+
+$app->add(AuthenticationFactory::getAuthentication());
 
 //users
 $container['user.controller'] = function (ContainerInterface $c) use ($app) {
@@ -43,7 +47,7 @@ $container['user.repository'] = function (ContainerInterface $c) use ($app) {
 
 //products
 $container['product.controller'] = function (ContainerInterface $c) use ($app) {
-    return new ProductController($app, $c->get('product.service'));
+    return new ProductController($app, $c->get('user.service'), $c->get('product.service'));
 };
 $container['product.service'] = function (ContainerInterface $c) use ($app) {
     return new ProductService($c->get('product.repository'));
@@ -54,10 +58,10 @@ $container['product.repository'] = function (ContainerInterface $c) use ($app) {
 
 //product batch
 $container['productBatch.service'] = function (ContainerInterface $c) use ($app) {
-    return new productBatchService($c->get('productBatch.repository'));
+    return new StateService($c->get('productBatch.repository'));
 };
 $container['productBatch.repository'] = function (ContainerInterface $c) use ($app) {
-    return new productBatchRepository($c->get('db.config'));
+    return new StateRepository($c->get('db.config'));
 };
 
 //transaction
@@ -71,7 +75,9 @@ $container['transaction.repository'] = function (ContainerInterface $c) use ($ap
 //warehouses
 $container['warehouse.controller'] = function (ContainerInterface $c) use ($app) {
     return new WarehouseController(
-        $app, $c->get('warehouse.service'),
+        $app,
+        $c->get('user.service'),
+        $c->get('warehouse.service'),
         $c->get('productBatch.service'),
         $c->get('product.service'),
         $c->get('transaction.service')

@@ -6,11 +6,7 @@ use App\Model\ProductBatch;
 use App\Model\Transaction;
 
 use App\Service\TransactionService;
-use App\Service\{
-    WarehouseService,
-    ProductBatchService,
-    ProductService
-};
+use App\Service\{UserService, WarehouseService, StateService, ProductService};
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -24,9 +20,9 @@ class WarehouseController extends BaseController
     private $warehouseService;
 
     /**
-     * @var ProductBatchService
+     * @var StateService
      */
-    private $productBatchService;
+    private $stateService;
 
     /**
      * @var ProductService
@@ -40,22 +36,25 @@ class WarehouseController extends BaseController
 
     /**
      * WarehouseController constructor.
+     *
      * @param App $app
+     * @param UserService $userService
      * @param WarehouseService $warehouseService
-     * @param ProductBatchService $productBatchService
+     * @param StateService $stateService
      * @param ProductService $productService
      * @param TransactionService $transactionService
      */
     public function __construct(
         App $app,
+        UserService $userService,
         WarehouseService $warehouseService,
-        ProductBatchService $productBatchService,
+        StateService $stateService,
         ProductService $productService,
         TransactionService $transactionService)
     {
-        parent::__construct($app);
+        parent::__construct($app, $userService);
         $this->warehouseService = $warehouseService;
-        $this->productBatchService = $productBatchService;
+        $this->stateService = $stateService;
         $this->productService = $productService;
         $this->transactionService = $transactionService;
     }
@@ -68,24 +67,22 @@ class WarehouseController extends BaseController
      */
     public function addWarehouse(Request $request, Response $response) {
         try {
-
+            $this->initUser($request);
             $bodyParams = $request->getParsedBody();
-
-            if (!isset($bodyParams['address']) || empty(trim($bodyParams['address']))) {
-                throw new \LogicException(__CLASS__ . ' addWarehouse() address is undefined!');
-            }
-
-            if (!isset($bodyParams['capacity']) || !filter_var($bodyParams['capacity'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' addWarehouse() capacity is undefined!');
-            }
+            $address = $this->validateVar(trim($bodyParams['address']), 'string');
+            $capacity = $this->validateVar(trim($bodyParams['capacity']), 'int');
 
             $warehouse = new Warehouse(
                 null,
-                (string)trim($bodyParams['address']),
-                (int)$bodyParams['capacity']
+                $address,
+                $capacity
             );
 
-            $this->warehouseService->add($warehouse);
+            if ($this->warehouseService->getOneByAddress($address, $this->user) !== null) {
+                throw new \LogicException(__CLASS__ . ' addWarehouse() warehouse with this address already exists!');
+            }
+
+            $this->warehouseService->add($warehouse, $this->user);
 
             return $response
                 ->withStatus(201)
@@ -112,29 +109,32 @@ class WarehouseController extends BaseController
     public function updateWarehouse(Request $request, Response $response, $args)
     {
         try {
-
+            $this->initUser($request);
             $bodyParams = $request->getParsedBody();
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' updateWarehouse() warehouse id is not integer!');
+            $id = $this->validateVar(trim($args['id']), 'int');
+            //$warehouse = ;
+
+            if ($this->warehouseService->getOne($id, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' updateWarehouse() warehouse with id ' . $id . ' not found!', 404);
             }
 
             $address = null;
 
             if (isset($bodyParams['address'])) {
-                if (empty(trim($bodyParams['address']))) {
-                    throw new \LogicException(__CLASS__ . ' updateWarehouse() address is undefined!');
+                $address = $this->validateVar(trim($bodyParams['address']), 'string');
+                if ($this->warehouseService->getOneByAddress($address, $this->user) !== null) {
+                    throw new \LogicException(__CLASS__ . ' updateWarehouse() warehouse with this address already exists!');
                 }
-                $address = (string)trim($bodyParams['address']);
             }
 
             $capacity = null;
 
             if (isset($bodyParams['capacity'])) {
-                if (!filter_var($bodyParams['capacity'], FILTER_VALIDATE_INT)) {
-                    throw new \LogicException(__CLASS__ . ' updateWarehouse() capacity is not integer!');
+                $capacity = $this->validateVar(trim($bodyParams['capacity']), 'int');
+                if ($this->stateService->getFilling($id) > $capacity) {
+                    throw new \LogicException(__CLASS__ . ' updateWarehouse() new capacity can not be less than filling!');
                 }
-                $capacity = (int)$bodyParams['capacity'];
             }
 
             if ($address === null && $capacity === null) {
@@ -142,12 +142,12 @@ class WarehouseController extends BaseController
             }
 
             $warehouse = new Warehouse(
-                (int)$args['id'],
+                $id,
                 $address,
                 $capacity
             );
 
-            $warehouse = $this->warehouseService->update($warehouse);
+            $warehouse = $this->warehouseService->update($warehouse, $this->user);
 
             return $response
                 ->withStatus(200)
@@ -181,19 +181,21 @@ class WarehouseController extends BaseController
     public function deleteWarehouse(Request $request, Response $response, $args)
     {
         try {
+            $this->initUser($request);
+            $id = $this->validateVar(trim($args['id']), 'int');
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' addWarehouse() warehouse id is not integer!');
+            if ($this->warehouseService->getOne($id, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' deleteWarehouse() warehouse with id ' . $id . ' not found!', 404);
             }
 
-            $warehouse = $this->warehouseService->getOne((int)$args['id']);
-
-            $warehouse = $this->warehouseService->remove($warehouse);
+            if ($this->transactionService->findByWarehouseId($id) !== null) {
+                throw new \LogicException(__CLASS__ . " deleteWarehouse() warehouse with id {$id} already participated in the movement!");
+            }
+            $this->warehouseService->remove($id);
 
             return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($warehouse->getWarehouseArray());
+                ->withStatus(204)
+                ->withHeader('Content-Type', 'application/json');
 
         } catch(\LogicException $exception) {
 
@@ -220,12 +222,13 @@ class WarehouseController extends BaseController
     public function getWarehouse(Request $request, Response $response, $args)
     {
         try {
+            $this->initUser($request);
+            $id = $this->validateVar(trim($args['id']), 'int');
+            $warehouse = $this->warehouseService->getOne($id, $this->user);
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' getWarehouse() id is not integer!');
+            if($warehouse === null) {
+                throw new \LogicException(__CLASS__ . ' getWarehouse() warehouse with id ' . $id . ' not found!', 404);
             }
-
-            $warehouse = $this->warehouseService->getOne((int)$args['id']);
 
             return $response
                 ->withStatus(200)
@@ -250,15 +253,14 @@ class WarehouseController extends BaseController
     /**
      * @param Request $request
      * @param Response $response
-     * @param $args
      *
      * @return Response
      */
-    public function getAllWarehouses(Request $request, Response $response, $args)
+    public function getAllWarehouses(Request $request, Response $response)
     {
         try {
-
-            $warehouses = $this->warehouseService->getAll();
+            $this->initUser($request);
+            $warehouses = $this->warehouseService->getAll($this->user);
 
             $warehousesArray = [];
 
@@ -291,44 +293,36 @@ class WarehouseController extends BaseController
     public function receiptProducts(Request $request, Response $response, $args)
     {
         try {
-            //проверка на размер склада
             //добавить добавление нескольких товаров
-
+            $this->initUser($request);
             $direction = 'receipt';
             $bodyParams = $request->getParsedBody();
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' receiptProducts() id is not integer!');
+            $warehouseId = $this->validateVar(trim($args['id']), 'int');
+            $productId = $this->validateVar(trim($bodyParams['productId']), 'int');
+            $quantity = $this->validateVar(trim($bodyParams['quantity']), 'int');
+            $sender = $this->validateVar(trim($bodyParams['sender']), 'string');
+
+            $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
+
+            if ($warehouse === null) {
+                throw new \LogicException(__CLASS__ . ' receiptProducts() warehouse with id ' . $warehouseId . ' not found!', 404);
             }
-            $warehouse = $this->warehouseService->getOne((int)$args['id']);
 
-            if (!isset($bodyParams['productId']) || !filter_var($bodyParams['productId'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' receiptProducts() productId is undefined!');
+            $product = $this->productService->getOne($productId, $this->user);
+            if ($product === null) {
+                throw new \LogicException(__CLASS__ . ' receiptProducts() product with id ' . $productId . ' not found!', 404);
             }
-            $product = $this->productService->getOne((int)$bodyParams['productId']);
 
-            if (!isset($bodyParams['quantity']) || !filter_var($bodyParams['quantity'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' receiptProducts() quantity is undefined!');
+            $filling = $this->stateService->getFilling($warehouseId);
+            if (($warehouse->getCapacity() - $filling) < ($quantity * $product->getSize())) {
+                throw new \LogicException(__CLASS__ . ' receiptProducts() not enough space on warehouse!');
             }
-            $quantity = (int)$bodyParams['quantity'];
-
-            if (!isset($bodyParams['sender']) || empty(trim($bodyParams['sender']))) {
-                throw new \LogicException(__CLASS__ . ' receiptProducts() sender is undefined!');
-            }
-            $sender = (string)$bodyParams['sender'];
-
-            $productBatch = new ProductBatch(
-                null,
-                $product,
-                $quantity
-            );
-
-            $this->productBatchService->add($productBatch, $warehouse);
 
             $transaction = new Transaction(
                 null,
-                $warehouse,
-                $product,
+                $warehouseId,
+                $productId,
                 $quantity,
                 $direction,
                 (string)date('Y-m-d H:i:s'),
@@ -338,16 +332,17 @@ class WarehouseController extends BaseController
             );
 
             $this->transactionService->add($transaction);
+            $this->stateService->addProducts($warehouseId, $productId, $quantity);
 
             return $response
                 ->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
                 ->withJson([
                     'transactionId' => $transaction->getId(),
-                    'productId' => $product->getId(),
+                    'productId' => $productId,
                     'quantity' => $transaction->getQuantity(),
                     'from' => $transaction->getSender(),
-                    'to' => $warehouse->getAddress()
+                    'to' => $warehouseId
                 ]);
 
         } catch (\LogicException $exception) {
@@ -366,47 +361,41 @@ class WarehouseController extends BaseController
      * @param $args
      *
      * @return Response
+     *
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
     public function dispatchProducts(Request $request, Response $response, $args)
     {
         try {
             //добавить отправление нескольких товаров
-
+            //выводить error json массив
+            $this->initUser($request);
             $direction = 'dispatch';
             $bodyParams = $request->getParsedBody();
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' dispatchProducts() id is not integer!');
+            $warehouseId = $this->validateVar(trim($args['id']), 'int');
+            $productId = $this->validateVar(trim($bodyParams['productId']), 'int');
+            $quantity = $this->validateVar(trim($bodyParams['quantity']), 'int');
+            $recipient = $this->validateVar(trim($bodyParams['recipient']), 'string');
+
+            if ($this->validateVar(trim($bodyParams['productId']), 'int') === null) {
+                throw new \LogicException(__CLASS__ . ' dispatchProducts() product with id ' . $productId . ' not found!', 404);
             }
-            $warehouse = $this->warehouseService->getOne((int)$args['id']);
 
-            if (!isset($bodyParams['productId']) || !filter_var($bodyParams['productId'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' dispatchProducts() productId is undefined!');
+            if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' dispatchProducts() warehouse with id ' . $warehouseId . ' not found!', 404);
             }
-            $product = $this->productService->getOne((int)$bodyParams['productId']);
 
-            if (!isset($bodyParams['quantity']) || !filter_var($bodyParams['quantity'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' dispatchProducts() quantity is undefined!');
+            $thisQuantity = $this->stateService->quantityProductInWarehouse($warehouseId, $productId);
+
+            if ($thisQuantity < $quantity) {
+                throw new \LogicException(__CLASS__ . ' dispatchProducts() not enough product on warehouse!', 400);
             }
-            $quantity = (int)$bodyParams['quantity'];
-
-            if (!isset($bodyParams['recipient']) || empty(trim($bodyParams['recipient']))) {
-                throw new \LogicException(__CLASS__ . ' dispatchProducts() sender is undefined!');
-            }
-            $recipient = (string)$bodyParams['recipient'];
-
-            $productBatch = new ProductBatch(
-                null,
-                $product,
-                $quantity
-            );
-
-            $this->productBatchService->remove($productBatch, $warehouse);
 
             $transaction = new Transaction(
                 null,
-                $warehouse,
-                $product,
+                $warehouseId,
+                $productId,
                 $quantity,
                 $direction,
                 (string)date('Y-m-d H:i:s'),
@@ -415,29 +404,23 @@ class WarehouseController extends BaseController
             );
 
             $this->transactionService->add($transaction);
+            $this->stateService->removeProducts($warehouseId, $productId, $quantity);
 
             return $response
                 ->withStatus(200)
                 ->withHeader('Content-Type', 'application/json')
                 ->withJson([
                     'transactionId' => $transaction->getId(),
-                    'productId' => $product->getId(),
+                    'productId' => $productId,
                     'quantity' => $transaction->getQuantity(),
-                    'from' => $warehouse->getAddress(),
+                    'from' => $warehouseId,
                     'to' => $transaction->getRecipient()
                 ]);
 
         } catch (\LogicException $exception) {
-
             error_log($exception->getMessage());
-            $code = 400;
-
-            if ($exception->getCode() === 404) {
-                $code = 404;
-            }
-
             return $response
-                ->withStatus($code)
+                ->withStatus($exception->getCode())
                 ->withHeader('Content-Type', 'application/json');
         }
     }
@@ -448,66 +431,68 @@ class WarehouseController extends BaseController
      * @param $args
      *
      * @return Response
+     *
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
     public function movementProducts(Request $request, Response $response, $args)
     {
         try {
-            //проверить вместимость склада
             //отправление нескольких товаров
-
+            $this->initUser($request);
             $direction = 'betweenWarehouses';
             $bodyParams = $request->getParsedBody();
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' movementProducts() id is not integer!');
+            $warehouseId = $this->validateVar(trim($args['id']), 'int');
+            $productId = $this->validateVar(trim($bodyParams['productId']), 'int');
+            $quantity = $this->validateVar(trim($bodyParams['quantity']), 'int');
+            $newWarehouseId = $this->validateVar(trim($args['warehouseId']), 'int');
+
+            $product = $this->productService->getOne($productId, $this->user);
+            $newWarehouse = $this->warehouseService->getOne($newWarehouseId, $this->user);
+
+            if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' movementProducts() warehouse with id ' . $warehouseId . ' not found!', 404);
             }
-            $warehouse = $this->warehouseService->getOne((int)$args['id']);
-
-            if (!isset($bodyParams['productId']) || !filter_var($bodyParams['productId'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' movementProducts() productId is undefined!');
+            if ($product === null) {
+                throw new \LogicException(__CLASS__ . ' movementProducts() product with id ' . $warehouseId . ' not found!', 404);
             }
-            $product = $this->productService->getOne((int)$bodyParams['productId']);
-
-            if (!isset($bodyParams['quantity']) || !filter_var($bodyParams['quantity'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' movementProducts() quantity is undefined!');
+            if ($newWarehouse === null) {
+                throw new \LogicException(__CLASS__ . ' movementProducts() warehouse with id ' . $newWarehouseId . ' not found!', 404);
             }
-            $quantity = (int)$bodyParams['quantity'];
 
-            if (!isset($bodyParams['warehouseId']) || !filter_var($bodyParams['warehouseId'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' movementProducts() warehouseId is undefined!');
+            $thisQuantity = $this->stateService->quantityProductInWarehouse($warehouseId, $productId);
+            $filling = $this->stateService->getFilling($newWarehouseId);
+
+            if ($thisQuantity < $quantity) {
+                throw new \LogicException(__CLASS__ . " movementProducts() not enough product on warehouse with id {$warehouseId}!");
             }
-            $newWarehouse = $this->warehouseService->getOne((int)$bodyParams['warehouseId']);
-
-            $productBatch = new ProductBatch(
-                null,
-                $product,
-                $quantity
-            );
-
-            $this->productBatchService->movement($productBatch, $warehouse, $newWarehouse);
+            if (($newWarehouse->getCapacity() - $filling) < ($quantity * $product->getSize())) {
+                throw new \LogicException(__CLASS__ . " movementProducts() not enough space on warehouse with id {$newWarehouseId}!");
+            }
 
             $transaction = new Transaction(
                 null,
-                $warehouse,
-                $product,
+                $warehouseId,
+                $productId,
                 $quantity,
                 $direction,
                 (string)date('Y-m-d'),
                 null,
-                $newWarehouse->getId()
+                $newWarehouseId
             );
 
             $this->transactionService->add($transaction);
+            $this->stateService->movementProducts($warehouseId, $productId, $quantity, $newWarehouseId);
 
             return $response
                 ->withStatus(201)
                 ->withHeader('Content-Type', 'application/json')
                 ->withJson([
                     'transactionId' => $transaction->getId(),
-                    'productId' => $product->getId(),
+                    'productId' => $productId,
                     'quantity' => $transaction->getQuantity(),
-                    'from' => $warehouse->getAddress(),
-                    'to' => $newWarehouse->getAddress()
+                    'from' => $warehouseId,
+                    'to' => $newWarehouseId
                 ]);
 
         } catch (\LogicException $exception) {

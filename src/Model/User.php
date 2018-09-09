@@ -12,12 +12,22 @@ class User
     /**
      * @var string
      */
+    private $login;
+
+    /**
+     * @var string
+     */
     private $name;
 
     /**
      * @var string
      */
     private $surname;
+
+    /**
+     * @var string
+     */
+    private $passwordHash;
 
     /**
      * @var string
@@ -32,32 +42,29 @@ class User
     /**
      * @var string
      */
-    private $password;
-
-    /**
-     * @var string
-     */
     private $phoneNumber;
 
     /**
      * User constructor.
      *
      * @param int $id
+     * @param string $login
      * @param string $name
      * @param string $surname
+     * @param string $passwordHash
      * @param string $organization
      * @param string $email
-     * @param string $password
      * @param string $phoneNumber
      */
-    public function __construct($id, $name, $surname, $organization, $email, $password, $phoneNumber)
+    public function __construct($id, $login, $name, $surname, $passwordHash, $organization, $email, $phoneNumber)
     {
         $this->id = $id;
+        $this->login = $login;
         $this->name = $name;
         $this->surname = $surname;
+        $this->passwordHash = $passwordHash;
         $this->organization = $organization;
         $this->email = $email;
-        $this->password = $password;
         $this->phoneNumber = $phoneNumber;
     }
 
@@ -75,6 +82,22 @@ class User
     public function setId($id)
     {
         $this->id = $id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogin()
+    {
+        return $this->login;
+    }
+
+    /**
+     * @param string $login
+     */
+    public function setLogin($login)
+    {
+        $this->login = $login;
     }
 
     /**
@@ -112,6 +135,22 @@ class User
     /**
      * @return string
      */
+    public function getPasswordHash()
+    {
+        return $this->passwordHash;
+    }
+
+    /**
+     * @param string $passwordHash
+     */
+    public function setPasswordHash($passwordHash)
+    {
+        $this->passwordHash = $passwordHash;
+    }
+
+    /**
+     * @return string
+     */
     public function getOrganization()
     {
         return $this->organization;
@@ -144,22 +183,6 @@ class User
     /**
      * @return string
      */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * @param string $password
-     */
-    public function setPassword($password)
-    {
-        $this->password = $password;
-    }
-
-    /**
-     * @return string
-     */
     public function getPhoneNumber()
     {
         return $this->phoneNumber;
@@ -173,6 +196,8 @@ class User
         $this->phoneNumber = $phoneNumber;
     }
 
+
+
     /**
      * @return array
      */
@@ -180,11 +205,11 @@ class User
     {
         return [
             'id' => $this->id,
+            'login' => $this->login,
             'name' => $this->name,
             'surname' => $this->surname,
             'organization' => $this->organization,
             'email' => $this->email,
-            'password' => $this->password,
             'phoneNumber' => $this->phoneNumber
         ];
     }

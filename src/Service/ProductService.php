@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Repository\ProductRepository;
 use App\Model\Product;
-
+use App\Model\User;
 class ProductService
 {
 
@@ -26,19 +26,39 @@ class ProductService
     /**
      * @return Product[]
      */
-    public function getAll()
+    public function getAll(User $user)
     {
-        return $this->productRepository->getAll();
+        return $this->productRepository->getAll($user);
     }
 
     /**
-     * @param int $id
+     * @param $id
+     * @param User $user
      *
      * @return Product|null
      */
-    public function getOne($id)
+    public function getOne($id, User $user)
     {
-        return $this->productRepository->findById($id);
+        return $this->productRepository->findById($id, $user);
+    }
+
+    /**
+     * @param Product $product
+     * @param User $user
+     */
+    public function add(Product $product, User $user)
+    {
+        return $this->productRepository->insert($product, $user);
+    }
+
+    /**
+     * @param $productId
+     *
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
+     */
+    public function remove($productId)
+    {
+        return $this->productRepository->delete($productId);
     }
 
     /**
@@ -46,29 +66,8 @@ class ProductService
      *
      * @return Product
      */
-    public function add(Product $product)
+    public function update(Product $product, User $user)
     {
-        return $this->productRepository->insert($product);
-    }
-
-    /**
-     * @param Product $product
-     * @return Product
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function remove(Product $product)
-    {
-        return $this->productRepository->delete($product);
-    }
-
-    /**
-     * @param Product $product
-     *
-     * @return Product
-     */
-    public function update(Product $product)
-    {
-        return $this->productRepository->update($product);
+        return $this->productRepository->update($product, $user);
     }
 }

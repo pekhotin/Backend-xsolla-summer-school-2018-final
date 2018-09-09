@@ -30,4 +30,14 @@ class TransactionService
         $this->transactionRepository->insert($transaction);
     }
 
+    /**
+     * @param int $warehouseId
+     *
+     * @return Transaction[]|null
+     */
+    public function findByWarehouseId($warehouseId)
+    {
+        return $this->transactionRepository->findAllByWarehouseId($warehouseId);
+    }
+
 }

@@ -2,46 +2,27 @@
 
 namespace App\Repository;
 
+use App\Model\User;
 use App\Model\Warehouse;
-use Doctrine\DBAL\Connection;
 
 class WarehouseRepository extends AbstractRepository
 {
     /**
-     * @var string
-     */
-    private $tableName;
-
-    /**
-     * WarehouseRepository constructor.
-     *
-     * @param Connection $dbConnection
-     */
-    public function __construct(Connection $dbConnection)
-    {
-        parent::__construct($dbConnection);
-        $this->tableName = 'Warehouses';
-    }
-
-    /**
      * @param int $id
+     * @param User $user
      *
-     * @return Warehouse
-     *
-     * @throws \LogicException
+     * @return Warehouse|null
      */
-    public function findById($id)
+    public function findById($id, $user)
     {
         $row = $this->dbConnection->fetchAssoc(
-            'SELECT * FROM ' . $this->tableName . ' WHERE id = ?',
-            [$id]
+            'SELECT * FROM Warehouses WHERE id = ? AND userId = ?',
+            [$id, $user->getId()]
         );
 
-        if ($row == null) {
-            throw new \LogicException(__CLASS__ . " findById() warehouse with id {$id} not found!", 404);
+        if ($row === false) {
+            return null;
         }
-
-        $productBatchRepository = new ProductBatchRepository($this->dbConnection);
 
         $warehouse = new Warehouse(
             $row['id'],
@@ -49,23 +30,33 @@ class WarehouseRepository extends AbstractRepository
             $row['capacity']
         );
 
-        $productBatches = $productBatchRepository->getAllInWarehouse($warehouse);
-        $warehouse->setProductBatches($productBatches);
-
         return $warehouse;
     }
 
     /**
-     * @param Warehouse $warehouse
+     * @param $address
+     * @param $user
      *
-     * @return int
+     * @return Warehouse|null
      */
-    public function getWarehouseCountByAddress(Warehouse $warehouse)
+    public function findByAddress($address, $user)
     {
-        return (int)$this->dbConnection->fetchColumn(
-            'SELECT count(address) FROM ' . $this->tableName . ' WHERE address = ?',
-            [$warehouse->getAddress()]
+        $row = $this->dbConnection->fetchAssoc(
+            'SELECT * FROM Warehouses WHERE address = ? AND userId = ?',
+            [
+                $address,
+                $user->getId()
+            ]
         );
+
+        if($row === false) return null;
+
+        return new Warehouse(
+            $row['id'],
+            $row['address'],
+            $row['capacity']
+        );
+
     }
 
     /**
@@ -83,129 +74,80 @@ class WarehouseRepository extends AbstractRepository
 
     /**
      * @param Warehouse $warehouse
-     *
-     * @return int
+     * @param User $user
      */
-    public function getFilling(Warehouse $warehouse)
+    public function insert($warehouse, $user)
     {
-        $productBatchRepository = new ProductBatchRepository($this->dbConnection);
-        $batches = $productBatchRepository->getAllInWarehouse($warehouse);
-
-        $filling = 0;
-
-        foreach ($batches as $batch)
-        {
-            $filling += $batch->getSize();
-        }
-
-        return $filling;
-    }
-
-    /**
-     * @param Warehouse $warehouse
-     *
-     * @return Warehouse
-     *
-     * @throws \LogicException
-     */
-    public function insert(Warehouse $warehouse)
-    {
-        if ($this->getWarehouseCountByAddress($warehouse) > 0) {
-            throw new \LogicException(__CLASS__ . " insert() warehouse with address {$warehouse ->getAddress()} already exists!");
-        }
-
         $values = [
             'address' => $warehouse->getAddress(),
-            'capacity' => $warehouse->getCapacity()
+            'capacity' => $warehouse->getCapacity(),
+            'userId' => $user->getId()
         ];
 
         $this->dbConnection->insert(
-            $this->tableName,
+            'Warehouses',
             $values
         );
 
         $warehouse->setId($this->dbConnection->lastInsertId());
-
-        return $warehouse;
     }
 
     /**
-     * @param Warehouse $warehouse
+     * @param int $warehouseId
      *
-     * @return Warehouse
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \LogicException
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function delete(Warehouse $warehouse)
+    public function delete($warehouseId)
     {
-        if ($this->getWarehouseCountById($warehouse) == 0){
-            throw new \LogicException(__CLASS__ . ' delete() id does not exists!', 404);
-        }
-
-        //добавить проверку на связные перемещения
         $this->dbConnection->delete(
-            $this->tableName,
-            ['id' => $warehouse->getId()]
+            'Warehouses',
+            ['id' => $warehouseId]
         );
-
-        return $warehouse;
     }
 
     /**
      * @param Warehouse $warehouse
+     * @param User $user
      *
-     * @return Warehouse
-     *
-     * @throws \LogicException
+     * @return Warehouse|null
      */
-    public function update(Warehouse $warehouse)
+    public function update($warehouse, $user)
     {
-        if ($this->getWarehouseCountById($warehouse) == 0){
-            throw new \LogicException(__CLASS__ . ' update() id does not exists!', 404);
-        }
-
         $values = [];
 
         if ($warehouse->getAddress() !== null) {
-
-            if ($this->getWarehouseCountByAddress($warehouse) > 0){
-                throw new \LogicException(__CLASS__ . " update() warehouse with address {$warehouse ->getAddress()} already exists!");
-            }
-
             $values['address'] =  $warehouse->getAddress();
         }
 
         if ($warehouse->getCapacity() !== null) {
-
-            if ($this->getFilling($warehouse) > $warehouse->getCapacity())
-                throw new \LogicException(__CLASS__ .  ' update() warehouse filling more than its capacity!');
-
             $values['capacity'] = $warehouse->getCapacity();
         }
 
-        if (count($values) == 0) {
-            throw new \LogicException(__CLASS__ .  ' update() updates parameters are not found!');
-        }
-
         $this->dbConnection->update(
-            $this->tableName,
+            'Warehouses',
             $values,
-            ['id' => $warehouse->getId()]
+            [
+                'id' => $warehouse->getId(),
+                'userId' => $user->getId()
+            ]
         );
 
-        return $this->findById($warehouse->getId());
+        return $this->findById($warehouse->getId(), $user);
     }
 
     /**
+     * @param User $user
+     *
      * @return Warehouse[]
      */
-    public function getAll()
+    public function getAll($user)
     {
-        $rows = $this->dbConnection->fetchAll('SELECT * FROM ' . $this->tableName);
+        $rows = $this->dbConnection->fetchAll(
+            'SELECT * FROM Warehouses WHERE userId = ?',
+            [$user->getId()]
+        );
 
         $warehouses = [];
-        $productBatchRepository = new ProductBatchRepository($this->dbConnection);
 
         foreach ($rows as $row) {
             $warehouses[] = new Warehouse(
@@ -213,8 +155,6 @@ class WarehouseRepository extends AbstractRepository
                 $row['address'],
                 $row['capacity']
             );
-
-            end($warehouses)->setProductBatches($productBatchRepository->getAllInWarehouse(end($warehouses)));
         }
 
         return $warehouses;

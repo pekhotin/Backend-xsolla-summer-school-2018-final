@@ -26,7 +26,8 @@ class ConnectionFactory
             'user' => 'root',
             'password' => 'root',
             'port' => 3306,
-            'charset' => 'utf8'
+            'charset' => 'utf8',
+
         ];
 
 	    $config = new Configuration();

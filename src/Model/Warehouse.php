@@ -29,6 +29,7 @@ class Warehouse
      *
      * @param $id
      * @param $address
+     * @param $capacity
      * @param array $batches
      */
     public function __construct($id, $address, $capacity, $batches = [])

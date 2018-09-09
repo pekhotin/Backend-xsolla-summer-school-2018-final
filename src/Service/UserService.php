@@ -24,21 +24,41 @@ class UserService
     /**
      * @param User $user
      */
-    public function add($user)
+    public function add(User $user)
     {
         $this->userRepository->insert($user);
     }
 
+    /**
+     * @param string $login
+     *
+     * @return User|null
+     */
+    public function getOneByLogin(string $login)
+    {
+        return $this->userRepository->findByLogin($login);
+    }
 
     /**
-     * @param string $name
-     * @param string $surname
-     * @param string $organization
+     * @param string $email
      *
-     * @return User|bool
+     * @return User|null
      */
-    public function findByNameAndOrganisation($name, $surname, $organization)
+    public function getOneByEmail(string $email)
     {
-        return $this->userRepository->findByNameAndOrganisation($name, $surname, $organization);
+        return $this->userRepository->findByEmail($email);
+    }
+
+
+    /**
+     * @param $name
+     * @param $surname
+     * @param $organization
+     *
+     * @return User|null
+     */
+    public function getOneByNameAndOrg(string $name, string $surname, string $organization)
+    {
+        return $this->userRepository->findByNameAndOrg($name, $surname, $organization);
     }
 }

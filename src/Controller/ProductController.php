@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\UserService;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -19,11 +20,12 @@ class ProductController extends BaseController
      * ProductController constructor.
      *
      * @param App $app
+     * @param UserService $userService
      * @param ProductService $productService
      */
-    public function __construct(App $app, ProductService $productService)
+    public function __construct(App $app, UserService $userService, ProductService $productService)
     {
-        parent::__construct($app);
+        parent::__construct($app, $userService);
         $this->productService = $productService;
     }
 
@@ -35,34 +37,24 @@ class ProductController extends BaseController
      */
     public function addProduct(Request $request, Response $response) {
         try {
-
+            $this->initUser($request);
             $bodyParams = $request->getParsedBody();
-
-            if (!isset($bodyParams['name']) || empty(trim($bodyParams['name']))) {
-                throw new \LogicException(__CLASS__ . ' register() name is undefined!');
-            }
-
-            if (!isset($bodyParams['price']) || !filter_var($bodyParams['price'], FILTER_VALIDATE_FLOAT)) {
-                throw new \LogicException(__CLASS__ . ' addProduct() price is undefined!');
-            }
-
-            if (!isset($bodyParams['size']) || !filter_var($bodyParams['size'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' addProduct() size is undefined!');
-            }
-
-            if (!isset($bodyParams['type']) || empty(trim($bodyParams['type']))) {
-                throw new \LogicException(__CLASS__ . ' addProduct() type is undefined!');
-            }
+            //json схема
+            $name = $this->validateVar(trim($bodyParams['name']), 'string');
+            //проверить имя на уникальность
+            $price = $this->validateVar(trim($bodyParams['price']), 'float');
+            $size = $this->validateVar(trim($bodyParams['size']), 'int');
+            $type = $this->validateVar(trim($bodyParams['type']), 'string');
 
             $product = new Product(
                 null,
-                (string)trim($bodyParams['name']),
-                (float)$bodyParams['price'],
-                (int)$bodyParams['size'],
-                (string)trim($bodyParams['type'])
+                $name,
+                $price,
+                $size,
+                $type
             );
 
-            $this->productService->add($product);
+            $this->productService->add($product, $this->user);
 
             return $response
                 ->withStatus(201)
@@ -90,47 +82,34 @@ class ProductController extends BaseController
     public function updateProduct(Request $request, Response $response, $args)
     {
         try {
-
+            $this->initUser($request);
             $bodyParams = $request->getParsedBody();
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' updateProduct() id is not integer!');
+            $id = $this->validateVar(trim($args['id']), 'int');
+            if ($this->productService->getOne($id, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' updateProduct () product with id ' . $id . ' not found!', 404);
             }
 
             $name = null;
-
+            //проверяем имя на уникальность
             if (isset($bodyParams['name'])) {
-                if (empty(trim($bodyParams['name']))) {
-                    throw new \LogicException(__CLASS__ . ' updateProduct() name is undefined!');
-                }
-                $name = (string)trim($bodyParams['name']);
+                $name = $this->validateVar(trim($bodyParams['name']), 'string)');
             }
 
             $price = null;
-
             if (isset($bodyParams['price'])) {
-                if (!filter_var($bodyParams['price'], FILTER_VALIDATE_FLOAT)) {
-                    throw new \LogicException(__CLASS__ . ' updateProduct() price is not float!');
-                }
-                $price = (float)$bodyParams['price'];
+                $price = $this->validateVar(trim($bodyParams['price']), 'float');
             }
 
             $size = null;
-
+            //если продукт участвовал в перемещениях, мы не можеим изменить его размер
             if (isset($bodyParams['size'])) {
-                if (!filter_var($bodyParams['size'], FILTER_VALIDATE_INT)) {
-                    throw new \LogicException(__CLASS__ . ' updateProduct() size is not integer!');
-                }
-                $size = (int)$bodyParams['size'];
+                $size = $this->validateVar(trim($bodyParams['size']), 'int');
             }
 
             $type = null;
-
             if (isset($bodyParams['type'])) {
-                if (empty(trim($bodyParams['type']))) {
-                    throw new \LogicException(__CLASS__ . ' updateProduct() name is undefined!');
-                }
-                $type = (string)trim($bodyParams['type']);
+                $type = $this->validateVar(trim($bodyParams['type']), 'string');
             }
 
             if ($name === null && $price === null && $size === null  && $type === null ) {
@@ -138,14 +117,14 @@ class ProductController extends BaseController
             }
 
             $product = new Product(
-                (int)$args['id'],
+                $id,
                 $name,
                 $price,
                 $size,
                 $type
             );
 
-            $product = $this->productService->update($product);
+            $product = $this->productService->update($product, $this->user);
 
             return $response
                 ->withStatus(200)
@@ -180,18 +159,18 @@ class ProductController extends BaseController
     public function deleteProduct(Request $request, Response $response, $args)
     {
         try {
-
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' deleteProduct() id is not integer!');
+            $this->initUser($request);
+            $id = $this->validateVar(trim($args['id']), 'int');
+            if ($this->productService->getOne($id, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' deleteProduct () product with id ' . $id . ' not found!', 404);
             }
 
-            $product = $this->productService->getOne((int)$args['id']);
-            $this->productService->remove($product);
+            //проверить участвовал ли протукт в перемещениях
+            $this->productService->remove($id);
 
             return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($product->getProductArray());
+                ->withStatus(204)
+                ->withHeader('Content-Type', 'application/json');
 
         } catch(\LogicException $exception) {
 
@@ -218,12 +197,13 @@ class ProductController extends BaseController
     public function getProduct(Request $request, Response $response, $args)
     {
         try {
+            $this->initUser($request);
 
-            if (!filter_var($args['id'], FILTER_VALIDATE_INT)) {
-                throw new \LogicException(__CLASS__ . ' getProduct() id is not integer!');
+            $id = $this->validateVar(trim($args['id']), 'int');
+            $product = $this->productService->getOne($id, $this->user);
+            if ($product === null) {
+                throw new \LogicException(__CLASS__ . ' getProduct() product with id ' . $id . ' not found!', 404);
             }
-
-            $product = $this->productService->getOne($args['id']);
 
             return $response
                 ->withStatus(200)
@@ -255,7 +235,9 @@ class ProductController extends BaseController
     {
         try {
 
-            $products = $this->productService->getAll();
+            //добавить лимит?
+            $this->initUser($request);
+            $products = $this->productService->getAll($this->user);
             $productsArray = [];
 
             foreach ($products as $product) {
