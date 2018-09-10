@@ -98,7 +98,6 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mvc`.`Transactions` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `warehouseId` INT(11) NOT NULL,
   `productId` INT(11) NOT NULL,
   `quantity` INT(11) NOT NULL,
   `direction` ENUM('receipt', 'dispatch', 'betweenWarehouses') NOT NULL,
@@ -107,16 +106,10 @@ CREATE TABLE IF NOT EXISTS `mvc`.`Transactions` (
   `recipient` VARCHAR(255) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
-  INDEX `WarehouseTransaction_idx` (`warehouseId` ASC) VISIBLE,
   INDEX `ProductTransaction_idx` (`productId` ASC) VISIBLE,
   CONSTRAINT `ProductTransaction`
     FOREIGN KEY (`productId`)
     REFERENCES `mvc`.`Products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `WarehouseTransaction`
-    FOREIGN KEY (`warehouseId`)
-    REFERENCES `mvc`.`Warehouses` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
