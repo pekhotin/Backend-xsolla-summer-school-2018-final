@@ -15,7 +15,7 @@ $app->group('/api/v1', function () use ($app) {
     $app->put('/warehouses/{id}/movement', 'warehouse.controller:movementProducts');
     $app->get('/warehouses/{id}/residues', 'warehouse.controller:getResidues');
     $app->get('/warehouses/{id}/residues/{date}', 'warehouse.controller:getResiduesForDate');
-
+    $app->get('/warehouses/{id}/movements', 'warehouse.controller:getMovements');
 
     $app->get('/products', 'product.controller:getAllProducts');
     $app->get('/products/{id}', 'product.controller:getProduct');
@@ -25,5 +25,5 @@ $app->group('/api/v1', function () use ($app) {
 
     $app->get('/products/{id}/residues', 'product.controller:getResidues');
     $app->get('/products/{id}/residues/{date}', 'product.controller:getResiduesForDate');
-
+    $app->get('/products/{id}/movements', 'product.controller:getMovements');
 });

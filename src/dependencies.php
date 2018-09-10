@@ -59,7 +59,8 @@ $container['product.controller'] = function (ContainerInterface $c) use ($app) {
         $app,
         $c->get('user.service'),
         $c->get('product.service'),
-        $c->get('state.service')
+        $c->get('state.service'),
+        $c->get('transaction.service')
     );
 };
 $container['product.service'] = function (ContainerInterface $c) use ($app) {

@@ -35,9 +35,14 @@ class TransactionService
      *
      * @return Transaction[]|null
      */
-    public function findByWarehouseId($warehouseId)
+    public function getMovementsByWarehouse($warehouseId)
     {
-        return $this->transactionRepository->findAllByWarehouseId($warehouseId);
+        return $this->transactionRepository->findAllByWarehouse($warehouseId);
+    }
+
+    public function getMovementsByProduct($productId)
+    {
+        return $this->transactionRepository->getAllByProduct($productId);
     }
 
 }

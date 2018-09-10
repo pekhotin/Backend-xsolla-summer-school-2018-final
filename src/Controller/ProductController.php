@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\StateService;
+use App\Service\TransactionService;
 use App\Service\UserService;
 use Slim\App;
 use Slim\Http\Request;
@@ -17,7 +18,15 @@ class ProductController extends BaseController
      */
     private $productService;
 
+    /**
+     * @var StateService
+     */
     private $stateService;
+
+    /**
+     * @var TransactionService
+     */
+    private $transactionService;
 
     /**
      * ProductController constructor.
@@ -26,12 +35,20 @@ class ProductController extends BaseController
      * @param UserService $userService
      * @param ProductService $productService
      * @param StateService $stateService
+     * @param TransactionService $transactionService
      */
-    public function __construct(App $app, UserService $userService, ProductService $productService, StateService $stateService)
+    public function __construct(
+        App $app,
+        UserService $userService,
+        ProductService $productService,
+        StateService $stateService,
+        TransactionService $transactionService
+    )
     {
         parent::__construct($app, $userService);
         $this->productService = $productService;
         $this->stateService = $stateService;
+        $this->transactionService = $transactionService;
     }
 
     /**
@@ -311,6 +328,37 @@ class ProductController extends BaseController
                 ->withStatus(201)
                 ->withHeader('Content-Type', 'application/json')
                 ->withJson($products);
+
+        } catch (\LogicException $exception) {
+
+            error_log($exception->getMessage());
+            $code = 400;
+
+            if ($exception->getCode() === 404) {
+                $code = 404;
+            }
+
+            return $response
+                ->withStatus($code)
+                ->withHeader('Content-Type', 'application/json');
+        }
+    }
+
+    public function getMovements(Request $request, Response $response, $args)
+    {
+        try {
+            $this->initUser($request);
+            $productId = $this->validateVar(trim($args['id']), 'int');
+
+            if ($this->productService->getOne($productId, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' getResidues() product with id ' . $productId . ' not found!', 404);
+            }
+
+            $transactions = $this->transactionService->getMovementsByProduct($productId);
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json')
+                ->withJson($transactions);
 
         } catch (\LogicException $exception) {
 

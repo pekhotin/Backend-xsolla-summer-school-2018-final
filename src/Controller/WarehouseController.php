@@ -189,7 +189,7 @@ class WarehouseController extends BaseController
                 throw new \LogicException(__CLASS__ . ' deleteWarehouse() warehouse with id ' . $id . ' not found!', 404);
             }
 
-            if ($this->transactionService->findByWarehouseId($id) !== null) {
+            if ($this->transactionService->getMovementsByWarehouse($id) !== null) {
                 throw new \LogicException(__CLASS__ . " deleteWarehouse() warehouse with id {$id} already participated in the movement!");
             }
             $this->warehouseService->remove($id);
@@ -322,13 +322,12 @@ class WarehouseController extends BaseController
 
             $transaction = new Transaction(
                 null,
-                $warehouseId,
                 $productId,
                 $quantity,
                 $direction,
                 (string)date('Y-m-d H:i:s'),
                 $sender,
-                null
+                $warehouseId
 
             );
 
@@ -342,8 +341,10 @@ class WarehouseController extends BaseController
                     'transactionId' => $transaction->getId(),
                     'productId' => $productId,
                     'quantity' => $transaction->getQuantity(),
+                    'cost' => $product->getPrice()*$transaction->getQuantity(),
+                    'datetime' => $transaction->getDatetime(),
                     'from' => $transaction->getSender(),
-                    'to' => $warehouseId
+                    'to' => $transaction->getRecipient()
                 ]);
 
         } catch (\LogicException $exception) {
@@ -382,7 +383,7 @@ class WarehouseController extends BaseController
             if ($this->validateVar(trim($bodyParams['productId']), 'int') === null) {
                 throw new \LogicException(__CLASS__ . ' dispatchProducts() product with id ' . $productId . ' not found!', 404);
             }
-
+            $product = $this->productService->getOne($productId, $this->user);
             if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
                 throw new \LogicException(__CLASS__ . ' dispatchProducts() warehouse with id ' . $warehouseId . ' not found!', 404);
             }
@@ -395,12 +396,11 @@ class WarehouseController extends BaseController
 
             $transaction = new Transaction(
                 null,
-                $warehouseId,
                 $productId,
                 $quantity,
                 $direction,
                 (string)date('Y-m-d H:i:s'),
-                null,
+                $warehouseId,
                 $recipient
             );
 
@@ -414,7 +414,9 @@ class WarehouseController extends BaseController
                     'transactionId' => $transaction->getId(),
                     'productId' => $productId,
                     'quantity' => $transaction->getQuantity(),
-                    'from' => $warehouseId,
+                    'cost' => $product->getPrice()*$transaction->getQuantity(),
+                    'datetime' => $transaction->getDatetime(),
+                    'from' => $transaction->getSender(),
                     'to' => $transaction->getRecipient()
                 ]);
 
@@ -471,12 +473,11 @@ class WarehouseController extends BaseController
 
             $transaction = new Transaction(
                 null,
-                $warehouseId,
                 $productId,
                 $quantity,
                 $direction,
-                (string)date('Y-m-d'),
-                null,
+                (string)date('Y-m-d H:i:s'),
+                $warehouseId,
                 $newWarehouseId
             );
 
@@ -490,8 +491,10 @@ class WarehouseController extends BaseController
                     'transactionId' => $transaction->getId(),
                     'productId' => $productId,
                     'quantity' => $transaction->getQuantity(),
-                    'from' => $warehouseId,
-                    'to' => $newWarehouseId
+                    'cost' => $product->getPrice()*$transaction->getQuantity(),
+                    'datetime' => $transaction->getDatetime(),
+                    'from' => $transaction->getSender(),
+                    'to' => $transaction->getRecipient()
                 ]);
 
         } catch (\LogicException $exception) {
@@ -577,5 +580,34 @@ class WarehouseController extends BaseController
                 ->withHeader('Content-Type', 'application/json');
         }
     }
+    public function getMovements(Request $request, Response $response, $args)
+    {
+        try {
+            $this->initUser($request);
+            $warehouseId = $this->validateVar(trim($args['id']), 'int');
 
+            if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+                throw new \LogicException(__CLASS__ . ' getResidues() product with id ' . $warehouseId . ' not found!', 404);
+            }
+
+            $transactions = $this->transactionService->getMovementsByWarehouse($warehouseId);
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json')
+                ->withJson($transactions);
+
+        } catch (\LogicException $exception) {
+
+            error_log($exception->getMessage());
+            $code = 400;
+
+            if ($exception->getCode() === 404) {
+                $code = 404;
+            }
+
+            return $response
+                ->withStatus($code)
+                ->withHeader('Content-Type', 'application/json');
+        }
+    }
 }
