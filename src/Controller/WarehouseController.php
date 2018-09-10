@@ -80,10 +80,7 @@ class WarehouseController extends BaseController
 
             $this->warehouseService->add($warehouse, $this->user);
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($warehouse->getWarehouseArray());
+            return $response->withJson($warehouse->getWarehouseArray(), 201);
     }
     /**
      * @param Request $request
@@ -127,10 +124,7 @@ class WarehouseController extends BaseController
 
         $warehouse = $this->warehouseService->update($warehouse, $this->user);
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($warehouse->getWarehouseArray());
+        return $response->withJson($warehouse->getWarehouseArray(), 200);
     }
     /**
      * @param Request $request
@@ -176,10 +170,7 @@ class WarehouseController extends BaseController
             throw new \LogicException("warehouse with id {$id} not found!", 404);
         }
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($warehouse->getWarehouseArray());
+        return $response->withJson($warehouse->getWarehouseArray(), 200);
     }
     /**
      * @param Request $request
@@ -197,10 +188,7 @@ class WarehouseController extends BaseController
             $warehousesArray[] = $warehouse->getWarehouseArray();
         }
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($warehousesArray);
+        return $response->withJson($warehousesArray, 200);
     }
     /**
      * @param Request $request
@@ -247,10 +235,7 @@ class WarehouseController extends BaseController
         $this->transactionService->add($transaction);
         $this->stateService->addProducts($warehouseId, $productId, $quantity);
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson([
+        return $response->withJson([
                 'transactionId' => $transaction->getId(),
                 'productId' => $productId,
                 'quantity' => $transaction->getQuantity(),
@@ -258,7 +243,7 @@ class WarehouseController extends BaseController
                 'datetime' => $transaction->getDatetime(),
                 'from' => $transaction->getSender(),
                 'to' => $transaction->getRecipient()
-            ]);
+            ], 201);
     }
     /**
      * @param Request $request
@@ -306,10 +291,7 @@ class WarehouseController extends BaseController
         $this->transactionService->add($transaction);
         $this->stateService->removeProducts($warehouseId, $productId, $quantity);
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson([
+        return $response->withJson([
                 'transactionId' => $transaction->getId(),
                 'productId' => $productId,
                 'quantity' => $transaction->getQuantity(),
@@ -317,7 +299,7 @@ class WarehouseController extends BaseController
                 'datetime' => $transaction->getDatetime(),
                 'from' => $transaction->getSender(),
                 'to' => $transaction->getRecipient()
-            ]);
+            ], 201);
     }
     /**
      * @param Request $request
@@ -372,10 +354,7 @@ class WarehouseController extends BaseController
         $this->transactionService->add($transaction);
         $this->stateService->movementProducts($warehouseId, $productId, $quantity, $newWarehouseId);
 
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson([
+        return $response->withJson([
                 'transactionId' => $transaction->getId(),
                 'productId' => $productId,
                 'quantity' => $transaction->getQuantity(),
@@ -383,7 +362,7 @@ class WarehouseController extends BaseController
                 'datetime' => $transaction->getDatetime(),
                 'from' => $transaction->getSender(),
                 'to' => $transaction->getRecipient()
-            ]);
+            ], 201);
     }
     /**
      * @param Request $request
@@ -402,10 +381,8 @@ class WarehouseController extends BaseController
         }
 
         $products = $this->stateService->getResiduesByWarehouse($warehouseId);
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($products);
+
+        return $response->withJson($products, 200);
     }
     /**
      * @param Request $request
@@ -426,10 +403,7 @@ class WarehouseController extends BaseController
 
         $products = $this->stateService->getResiduesByWarehouseForDate($warehouseId, $date);
 
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($products);
+        return $response->withJson($products, 200);
     }
     /**
      * @param Request $request
@@ -449,9 +423,6 @@ class WarehouseController extends BaseController
 
         $transactions = $this->transactionService->getMovementsByWarehouse($warehouseId);
 
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($transactions);
+        return $response->withJson($transactions, 200);
     }
 }

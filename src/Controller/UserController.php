@@ -49,9 +49,6 @@ class UserController extends BaseController
 
         $this->userService->add($user);
 
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($user->getUserArray());
+        return $response->withJson($user->getUserArray(), 201);
     }
 }

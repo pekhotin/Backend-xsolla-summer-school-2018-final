@@ -8,38 +8,27 @@ class Warehouse
      * @var int
      */
     private $id;
-
     /**
      * @var string
      */
     private $address;
-
     /**
      * @var int
      */
     private $capacity;
-
-    /**
-     * @var ProductBatch[]
-     */
-    private $batches;
-
     /**
      * Warehouse constructor.
      *
      * @param $id
      * @param $address
      * @param $capacity
-     * @param array $batches
      */
-    public function __construct($id, $address, $capacity, $batches = [])
+    public function __construct($id, $address, $capacity)
     {
         $this->id = $id;
         $this->address = $address;
         $this->capacity = $capacity;
-        $this->batches = $batches;
     }
-
     /**
      * @return int
      */
@@ -47,7 +36,6 @@ class Warehouse
     {
         return $this->id;
     }
-
     /**
      * @param int $id
      */
@@ -55,7 +43,6 @@ class Warehouse
     {
         $this->id = $id;
     }
-
     /**
      * @return string
      */
@@ -63,7 +50,6 @@ class Warehouse
     {
         return $this->address;
     }
-
     /**
      * @param string $address
      */
@@ -71,7 +57,6 @@ class Warehouse
     {
         $this->address = $address;
     }
-
     /**
      * @return int
      */
@@ -79,7 +64,6 @@ class Warehouse
     {
         return $this->capacity;
     }
-
     /**
      * @param int $capacity
      */
@@ -87,37 +71,6 @@ class Warehouse
     {
         $this->capacity = $capacity;
     }
-
-    /**
-     * @return ProductBatch[]|array
-     */
-    public function getProductBatches()
-    {
-        return $this->batches;
-    }
-
-    /**
-     * @param ProductBatch[] $batches
-     */
-    public function setProductBatches($batches)
-    {
-        $this->batches = $batches;
-    }
-
-    /**
-     * @return array
-     */
-    public function getProductBatchesArray()
-    {
-        $arrayBatches = [];
-
-        foreach ($this->batches as $batch) {
-            $arrayBatches[] = $batch->getProductBatchArray();
-        }
-
-        return $arrayBatches;
-    }
-
     /**
      * @return array
      */
@@ -126,8 +79,7 @@ class Warehouse
         return [
             'id' => $this->id,
             'address' => $this->address,
-            'capacity' => $this->capacity,
-            'products'=>$this->getProductBatchesArray()
+            'capacity' => $this->capacity
         ];
     }
 }

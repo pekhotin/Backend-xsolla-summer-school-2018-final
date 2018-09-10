@@ -8,7 +8,7 @@ use Doctrine\DBAL\Connection;
 class UserRepository extends AbstractRepository
 {
     /**
-     * @param $login
+     * @param string $login
      *
      * @return User|null
      */
@@ -34,7 +34,6 @@ class UserRepository extends AbstractRepository
             $row['phoneNumber']
         );
     }
-
     /**
      * @param string $email
      *
@@ -62,11 +61,10 @@ class UserRepository extends AbstractRepository
             $row['phoneNumber']
         );
     }
-
     /**
-     * @param $name
-     * @param $surname
-     * @param $organization
+     * @param string $name
+     * @param string $surname
+     * @param string $organization
      *
      * @return User|null
      */
@@ -92,7 +90,6 @@ class UserRepository extends AbstractRepository
             $row['phoneNumber']
         );
     }
-
     /**
      * @param User $user
      */

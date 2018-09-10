@@ -8,27 +8,22 @@ class Product
      * @var int
      */
     private $id;
-
     /**
      * @var string
      */
     private $name;
-
     /**
      * @var float
      */
     private $price;
-
     /**
      * @var int
      */
     private $size;
-
     /**
      * @var string
      */
     private $type;
-
     /**
      * Product constructor.
      *
@@ -46,7 +41,6 @@ class Product
         $this->size = $size;
         $this->type = $type;
     }
-
     /**
      * @param int $id
      */
@@ -54,7 +48,6 @@ class Product
     {
         $this->id = $id;
     }
-
     /**
      * @return int
      */
@@ -62,7 +55,6 @@ class Product
     {
         return $this->id;
     }
-
     /**
      * @return string
      */
@@ -70,7 +62,6 @@ class Product
     {
         return $this->name;
     }
-
     /**
      * @param string $name
      */
@@ -78,7 +69,6 @@ class Product
     {
         $this->name = $name;
     }
-
     /**
      * @return float
      */
@@ -86,7 +76,6 @@ class Product
     {
         return $this->price;
     }
-
     /**
      * @param float $price
      */
@@ -94,7 +83,6 @@ class Product
     {
         $this->price = $price;
     }
-
     /**
      * @return int
      */
@@ -102,7 +90,6 @@ class Product
     {
         return $this->size;
     }
-
     /**
      * @param int $size
      */
@@ -110,7 +97,6 @@ class Product
     {
         $this->size = $size;
     }
-
     /**
      * @return string
      */
@@ -118,7 +104,6 @@ class Product
     {
         return $this->type;
     }
-
     /**
      * @param string $type
      */
@@ -126,7 +111,6 @@ class Product
     {
         $this->type = $type;
     }
-
     /**
      * @return array
      */

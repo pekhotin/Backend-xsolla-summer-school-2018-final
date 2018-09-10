@@ -8,42 +8,34 @@ class User
      * @var int
      */
     private $id;
-
     /**
      * @var string
      */
     private $login;
-
     /**
      * @var string
      */
     private $name;
-
     /**
      * @var string
      */
     private $surname;
-
     /**
      * @var string
      */
     private $passwordHash;
-
     /**
      * @var string
      */
     private $organization;
-
     /**
      * @var string
      */
     private $email;
-
     /**
      * @var string
      */
     private $phoneNumber;
-
     /**
      * User constructor.
      *
@@ -67,7 +59,6 @@ class User
         $this->email = $email;
         $this->phoneNumber = $phoneNumber;
     }
-
     /**
      * @return int
      */
@@ -75,7 +66,6 @@ class User
     {
         return $this->id;
     }
-
     /**
      * @param int $id
      */
@@ -83,7 +73,6 @@ class User
     {
         $this->id = $id;
     }
-
     /**
      * @return string
      */
@@ -91,7 +80,6 @@ class User
     {
         return $this->login;
     }
-
     /**
      * @param string $login
      */
@@ -99,7 +87,6 @@ class User
     {
         $this->login = $login;
     }
-
     /**
      * @return string
      */
@@ -107,7 +94,6 @@ class User
     {
         return $this->name;
     }
-
     /**
      * @param string $name
      */
@@ -115,7 +101,6 @@ class User
     {
         $this->name = $name;
     }
-
     /**
      * @return string
      */
@@ -123,7 +108,6 @@ class User
     {
         return $this->surname;
     }
-
     /**
      * @param string $surname
      */
@@ -131,7 +115,6 @@ class User
     {
         $this->surname = $surname;
     }
-
     /**
      * @return string
      */
@@ -139,7 +122,6 @@ class User
     {
         return $this->passwordHash;
     }
-
     /**
      * @param string $passwordHash
      */
@@ -147,7 +129,6 @@ class User
     {
         $this->passwordHash = $passwordHash;
     }
-
     /**
      * @return string
      */
@@ -155,7 +136,6 @@ class User
     {
         return $this->organization;
     }
-
     /**
      * @param string $organization
      */
@@ -163,7 +143,6 @@ class User
     {
         $this->organization = $organization;
     }
-
     /**
      * @return string
      */
@@ -171,7 +150,6 @@ class User
     {
         return $this->email;
     }
-
     /**
      * @param string $email
      */
@@ -179,7 +157,6 @@ class User
     {
         $this->email = $email;
     }
-
     /**
      * @return string
      */
@@ -187,7 +164,6 @@ class User
     {
         return $this->phoneNumber;
     }
-
     /**
      * @param string $phoneNumber
      */
@@ -195,9 +171,6 @@ class User
     {
         $this->phoneNumber = $phoneNumber;
     }
-
-
-
     /**
      * @return array
      */

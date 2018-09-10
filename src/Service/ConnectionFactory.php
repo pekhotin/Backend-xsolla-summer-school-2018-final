@@ -14,11 +14,6 @@ class ConnectionFactory
      */
     public static function getConnection()
     {
-     //    $config = new Configuration();
-     //    return DriverManager::getConnection(
-     //    	include('config/doctrine.php'), 
-     //    	$config
-
         $configParams = [
             'driver' => 'pdo_mysql',
             'host' => 'localhost',

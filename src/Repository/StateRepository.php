@@ -22,7 +22,12 @@ class StateRepository extends AbstractRepository
         );
 
     }
-
+    /**
+     * @param int $warehouseId
+     * @param int $productId
+     *
+     * @return int
+     */
     public function getLastQuantity($warehouseId, $productId)
     {
         return (int)$this->dbConnection->fetchColumn(
@@ -34,7 +39,6 @@ class StateRepository extends AbstractRepository
         );
 
     }
-
     /**
      * @param int $warehouseId
      * @param int $productId
@@ -52,7 +56,6 @@ class StateRepository extends AbstractRepository
             ]
         );
     }
-
     /**
      * @param int $warehouseId
      * @param int $productId
@@ -70,7 +73,6 @@ class StateRepository extends AbstractRepository
             ]
         );
     }
-
     /**
      * @param int $warehouseId
      * @param int $productId
@@ -88,7 +90,6 @@ class StateRepository extends AbstractRepository
             ]
         );
     }
-
     /**
      * @param int $warehouseId
      * @param int $productId
@@ -109,11 +110,10 @@ class StateRepository extends AbstractRepository
             }
         }
     }
-
     /**
-     * @param $warehouseId
-     * @param $productId
-     * @param $quantity
+     * @param int $warehouseId
+     * @param int $productId
+     * @param int $quantity
      */
     public function removeProducts($warehouseId, $productId, $quantity)
     {
@@ -128,19 +128,17 @@ class StateRepository extends AbstractRepository
             }
         }
     }
-
     /**
-     * @param $warehouseId
-     * @param $productId
-     * @param $quantity
-     * @param $newWarehouseId
+     * @param int $warehouseId
+     * @param int $productId
+     * @param int $quantity
+     * @param int $newWarehouseId
      */
     public function movementProducts($warehouseId, $productId, $quantity, $newWarehouseId)
     {
         $this->removeProducts($warehouseId, $productId, $quantity);
         $this->addProducts($newWarehouseId, $productId, $quantity);
     }
-
     /**
      * @param int $warehouseId
      *
@@ -170,7 +168,6 @@ class StateRepository extends AbstractRepository
 
         return $filling;
     }
-
     /**
      * @param $warehouseId
      *
@@ -205,7 +202,6 @@ class StateRepository extends AbstractRepository
         }
         return $products;
     }
-
     /**
      * @param $productId
      *
@@ -236,7 +232,12 @@ class StateRepository extends AbstractRepository
         }
         return $products;
     }
-
+    /**
+     * @param $warehouseId
+     * @param $date
+     *
+     * @return array
+     */
     public function getResiduesByWarehouseForDate($warehouseId, $date)
     {
         $rows = $this->dbConnection->fetchAll(
@@ -267,7 +268,12 @@ class StateRepository extends AbstractRepository
         }
         return $products;
     }
-
+    /**
+     * @param $productId
+     * @param $date
+     *
+     * @return array
+     */
     public function getResiduesByProductForDate($productId, $date)
     {
         $rows = $this->dbConnection->fetchAll(

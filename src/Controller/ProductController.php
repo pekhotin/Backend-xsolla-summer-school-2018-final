@@ -78,10 +78,7 @@ class ProductController extends BaseController
 
         $this->productService->add($product, $this->user);
 
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($product->getProductArray());
+        return $response->withJson($product->getProductArray(), 201);
     }
 
     /**
@@ -137,10 +134,7 @@ class ProductController extends BaseController
 
         $product = $this->productService->update($product, $this->user);
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($product->getProductArray());
+        return $response->withJson($product->getProductArray(), 200);
     }
 
     /**
@@ -167,9 +161,7 @@ class ProductController extends BaseController
 
         $this->productService->remove($id);
 
-        return $response
-            ->withStatus(204)
-            ->withHeader('Content-Type', 'application/json');
+        return $response->withStatus(204);
     }
 
     /**
@@ -189,10 +181,7 @@ class ProductController extends BaseController
             throw new \LogicException("product with id {$id} not found!", 404);
         }
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($product->getProductArray());
+        return $response->withJson($product->getProductArray(), 200);
     }
 
     /**
@@ -212,10 +201,7 @@ class ProductController extends BaseController
             $productsArray[] = $product->getProductArray();
         }
 
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($productsArray);
+        return $response->withJson($productsArray, 200);
     }
 
     /**
@@ -235,10 +221,7 @@ class ProductController extends BaseController
         }
 
         $products = $this->stateService->getResiduesByProduct($productId);
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($products);
+        return $response->withJson($products, 200);
     }
 
     /**
@@ -260,10 +243,7 @@ class ProductController extends BaseController
 
         $products = $this->stateService->getResiduesByProductForDate($productId, $date);
 
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($products);
+        return $response->withJson($products, 200);
     }
 
     /**
@@ -283,9 +263,7 @@ class ProductController extends BaseController
         }
 
         $transactions = $this->transactionService->getMovementsByProduct($productId);
-        return $response
-            ->withStatus(201)
-            ->withHeader('Content-Type', 'application/json')
-            ->withJson($transactions);
+
+        return $response->withJson($transactions, 200);
     }
 }

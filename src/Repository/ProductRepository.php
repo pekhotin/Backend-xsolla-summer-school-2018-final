@@ -4,26 +4,9 @@ namespace App\Repository;
 
 use App\Model\Product;
 use App\Model\User;
-use Doctrine\DBAL\Connection;
 
 class ProductRepository extends AbstractRepository
 {
-    /**
-     * @var string
-     */
-    private $tableName;
-
-    /**
-     * ProductRepository constructor.
-     *
-     * @param Connection $dbConnection
-     */
-    public function __construct(Connection $dbConnection)
-    {
-        parent::__construct($dbConnection);
-        $this->tableName = 'Products';
-    }
-
     /**
      * @param int $id
      * @param User $user
@@ -33,7 +16,7 @@ class ProductRepository extends AbstractRepository
     public function findById($id, $user)
     {
         $row = $this->dbConnection->fetchAssoc(
-            'SELECT * FROM ' . $this->tableName . ' WHERE id = ? AND userId = ?',
+            'SELECT * FROM Products WHERE id = ? AND userId = ?',
             [$id, $user->getId()]
         );
 
@@ -49,7 +32,6 @@ class ProductRepository extends AbstractRepository
             $row['type']
         );
     }
-
     /**
      * @param Product $product
      * @param User $user
@@ -65,13 +47,12 @@ class ProductRepository extends AbstractRepository
         ];
 
         $this->dbConnection->insert(
-            $this->tableName,
+            'Products',
             $values
         );
 
         $product->setId($this->dbConnection->lastInsertId());
     }
-
     /**
      * @param $productId
      *
@@ -84,7 +65,6 @@ class ProductRepository extends AbstractRepository
             ['id' => $productId]
         );
     }
-
     /**
      * @param Product $product
      * @param User $user
@@ -122,7 +102,6 @@ class ProductRepository extends AbstractRepository
 
         return $this->findById($product->getId(), $user);
     }
-
     /**
      * @param User $user
      *

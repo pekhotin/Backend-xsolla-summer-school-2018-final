@@ -32,10 +32,9 @@ class WarehouseRepository extends AbstractRepository
 
         return $warehouse;
     }
-
     /**
-     * @param $address
-     * @param $user
+     * @param string $address
+     * @param User $user
      *
      * @return Warehouse|null
      */
@@ -58,7 +57,6 @@ class WarehouseRepository extends AbstractRepository
         );
 
     }
-
     /**
      * @param Warehouse $warehouse
      *
@@ -71,7 +69,6 @@ class WarehouseRepository extends AbstractRepository
             [$warehouse->getId()]
         );
     }
-
     /**
      * @param Warehouse $warehouse
      * @param User $user
@@ -91,7 +88,6 @@ class WarehouseRepository extends AbstractRepository
 
         $warehouse->setId($this->dbConnection->lastInsertId());
     }
-
     /**
      * @param int $warehouseId
      *
@@ -104,7 +100,6 @@ class WarehouseRepository extends AbstractRepository
             ['id' => $warehouseId]
         );
     }
-
     /**
      * @param Warehouse $warehouse
      * @param User $user
@@ -134,7 +129,6 @@ class WarehouseRepository extends AbstractRepository
 
         return $this->findById($warehouse->getId(), $user);
     }
-
     /**
      * @param User $user
      *

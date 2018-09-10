@@ -18,7 +18,11 @@ class TransactionRepository extends AbstractRepository
 
         $transaction->setId($this->dbConnection->lastInsertId());
     }
-
+    /**
+     * @param int $warehouseId
+     *
+     * @return array|null
+     */
     public function findAllByWarehouse($warehouseId)
     {
         $rows = $this->dbConnection->fetchAll(
@@ -51,7 +55,11 @@ class TransactionRepository extends AbstractRepository
         }
         return $transactionsArray;
     }
-
+    /**
+     * @param int $productId
+     *
+     * @return array|null
+     */
     public function getAllByProduct($productId)
     {
         $rows = $this->dbConnection->fetchAll(

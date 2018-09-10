@@ -7,6 +7,9 @@ use \Doctrine\DBAL\Driver\PDOConnection;
 
 class AuthenticationFactory
 {
+    /**
+     * @return HttpBasicAuthentication
+     */
     public static function getAuthentication()
     {
         $dbh = new PDOConnection('mysql:host=localhost;dbname=mvc', 'root', 'root');

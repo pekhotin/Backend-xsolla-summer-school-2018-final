@@ -10,37 +10,30 @@ class Transaction
      * @var int
      */
     private $id;
-
     /**
      * @var int
      */
     private $productId;
-
     /**
      * @var int
      */
     private $quantity;
-
     /**
      * @var string
      */
     private $direction;
-
     /**
      * @var string
      */
     private $datetime;
-
     /**
      * @var string
      */
     private $sender;
-
     /**
      * @var string
      */
     private $recipient;
-
     /**
      * Transaction constructor.
      *
@@ -62,8 +55,6 @@ class Transaction
         $this->sender = $sender;
         $this->recipient = $recipient;
     }
-
-
     /**
      * @return int
      */
@@ -71,7 +62,6 @@ class Transaction
     {
         return $this->id;
     }
-
     /**
      * @param int $id
      */
@@ -79,7 +69,6 @@ class Transaction
     {
         $this->id = $id;
     }
-
     /**
      * @return int
      */
@@ -87,7 +76,6 @@ class Transaction
     {
         return $this->productId;
     }
-
     /**
      * @param int $productId
      */
@@ -95,7 +83,6 @@ class Transaction
     {
         $this->productId = $productId;
     }
-
     /**
      * @return int
      */
@@ -103,7 +90,6 @@ class Transaction
     {
         return $this->quantity;
     }
-
     /**
      * @param int $quantity
      */
@@ -111,7 +97,6 @@ class Transaction
     {
         $this->quantity = $quantity;
     }
-
     /**
      * @return string
      */
@@ -119,7 +104,6 @@ class Transaction
     {
         return $this->direction;
     }
-
     /**
      * @param string $direction
      */
@@ -127,7 +111,6 @@ class Transaction
     {
         $this->direction = $direction;
     }
-
     /**
      * @return string
      */
@@ -135,7 +118,6 @@ class Transaction
     {
         return $this->datetime;
     }
-
     /**
      * @param string $datetime
      */
@@ -143,7 +125,6 @@ class Transaction
     {
         $this->datetime = $datetime;
     }
-
     /**
      * @return string
      */
@@ -151,7 +132,6 @@ class Transaction
     {
         return $this->sender;
     }
-
     /**
      * @param string $sender
      */
@@ -159,7 +139,6 @@ class Transaction
     {
         $this->sender = $sender;
     }
-
     /**
      * @return string
      */
@@ -167,7 +146,6 @@ class Transaction
     {
         return $this->recipient;
     }
-
     /**
      * @param string $recipient
      */
@@ -175,7 +153,6 @@ class Transaction
     {
         $this->recipient = $recipient;
     }
-
     /**
      * @return array
      */
