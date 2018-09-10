@@ -125,6 +125,7 @@ class ProductRepository extends AbstractRepository
 
     /**
      * @param User $user
+     *
      * @return Product[]
      */
     public function getAll($user)

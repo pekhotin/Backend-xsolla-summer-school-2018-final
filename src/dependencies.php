@@ -7,7 +7,7 @@ use \App\Controller\{
     WarehouseController,
     UserController
 };
-
+use App\Service\CustomHandler;
 use App\Service\{
     ConnectionFactory,
     WarehouseService,
@@ -30,6 +30,10 @@ $container = $app->getContainer();
 
 $container['db.config'] = function (ContainerInterface $c) {
     return ConnectionFactory::getConnection();
+};
+
+$container['errorHandler'] = function (ContainerInterface $c) {
+    return new CustomHandler();
 };
 
 $app->add(AuthenticationFactory::getAuthentication());

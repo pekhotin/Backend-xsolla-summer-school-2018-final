@@ -22,8 +22,10 @@ class ProductService
         
         $this->productRepository = $productRepository;
     }
-    
+
     /**
+     * @param User $user
+     *
      * @return Product[]
      */
     public function getAll(User $user)

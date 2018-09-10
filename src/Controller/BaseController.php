@@ -43,41 +43,41 @@ abstract class BaseController
     }
 
     /**
-     * @param string $var
+     * @param $var
      * @param string $type
-     *
+     * @param string $name
      * @return float|int|null|string
      */
-    protected function validateVar($var, $type)
+    protected function validateVar($var, $type, $name)
     {
         switch ($type) {
 
             case 'int':
                 if (filter_var($var, FILTER_VALIDATE_INT) === false) {
-                    throw new \LogicException(__CLASS__ . " validateVar() {$var} is not integer!");
+                    throw new \LogicException("{$name} is not integer!", 400);
                 }
                 return (int)$var;
 
             case 'string':
                 if (empty($var)) {
-                    throw new \LogicException(__CLASS__ . " validateVar() {$var} is empty!");
+                    throw new \LogicException("{$name} is empty!", 400);
                 }
                 return (string)$var;
 
             case 'float':
                 if (filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
-                    throw new \LogicException(__CLASS__ . " validateVar() {$var} is not float!");
+                    throw new \LogicException( "{$name} is not float!", 400);
                 }
                 return (float)$var;
             case 'email':
                 if(filter_var($var, FILTER_VALIDATE_EMAIL) === false) {
-                    throw new \LogicException(__CLASS__ . " validateVar() {$var} is not email!");
+                    throw new \LogicException( "{$name} is incorrect!", 400);
                 }
                 return (string)$var;
             case 'date':
                 $date = date_parse_from_format('Y-m-d', $var);
                 if(checkdate($date['month'], $date['day'], $date['year']) === false) {
-                    throw new \LogicException(__CLASS__ . " validateVar() {$var} is not date!");
+                    throw new \LogicException("date format is not 'Y-m-d'!", 400);
                 }
                 return $var;
             default:

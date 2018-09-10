@@ -57,41 +57,31 @@ class ProductController extends BaseController
      *
      * @return Response
      */
-    public function addProduct(Request $request, Response $response) {
-        try {
-            $this->initUser($request);
-            $bodyParams = $request->getParsedBody();
-            //json схема
-            $name = $this->validateVar(trim($bodyParams['name']), 'string');
-            //проверить имя на уникальность
-            $price = $this->validateVar(trim($bodyParams['price']), 'float');
-            $size = $this->validateVar(trim($bodyParams['size']), 'int');
-            $type = $this->validateVar(trim($bodyParams['type']), 'string');
+    public function addProduct(Request $request, Response $response)
+    {
+        $this->initUser($request);
+        $bodyParams = $request->getParsedBody();
+        //json схема
+        $name = $this->validateVar(trim($bodyParams['name']), 'string', 'name');
+        //проверить имя на уникальность
+        $price = $this->validateVar(trim($bodyParams['price']), 'float', 'price');
+        $size = $this->validateVar(trim($bodyParams['size']), 'int', 'size');
+        $type = $this->validateVar(trim($bodyParams['type']), 'string', 'type');
 
-            $product = new Product(
-                null,
-                $name,
-                $price,
-                $size,
-                $type
-            );
+        $product = new Product(
+            null,
+            $name,
+            $price,
+            $size,
+            $type
+        );
 
-            $this->productService->add($product, $this->user);
+        $this->productService->add($product, $this->user);
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($product->getProductArray());
-
-        } catch(\LogicException $exception) {
-
-            error_log($exception->getMessage());
-            $code = 400;
-
-            return $response
-                ->withStatus($code)
-                ->withHeader('Content-Type', 'application/json');
-        }
+        return $response
+            ->withStatus(201)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($product->getProductArray());
     }
 
     /**
@@ -103,70 +93,54 @@ class ProductController extends BaseController
      */
     public function updateProduct(Request $request, Response $response, $args)
     {
-        try {
-            $this->initUser($request);
-            $bodyParams = $request->getParsedBody();
+        $this->initUser($request);
+        $bodyParams = $request->getParsedBody();
 
-            $id = $this->validateVar(trim($args['id']), 'int');
-            if ($this->productService->getOne($id, $this->user) === null) {
-                throw new \LogicException(__CLASS__ . ' updateProduct () product with id ' . $id . ' not found!', 404);
-            }
-
-            $name = null;
-            //проверяем имя на уникальность
-            if (isset($bodyParams['name'])) {
-                $name = $this->validateVar(trim($bodyParams['name']), 'string)');
-            }
-
-            $price = null;
-            if (isset($bodyParams['price'])) {
-                $price = $this->validateVar(trim($bodyParams['price']), 'float');
-            }
-
-            $size = null;
-            //если продукт участвовал в перемещениях, мы не можеим изменить его размер
-            if (isset($bodyParams['size'])) {
-                $size = $this->validateVar(trim($bodyParams['size']), 'int');
-            }
-
-            $type = null;
-            if (isset($bodyParams['type'])) {
-                $type = $this->validateVar(trim($bodyParams['type']), 'string');
-            }
-
-            if ($name === null && $price === null && $size === null  && $type === null ) {
-                throw new \LogicException(__CLASS__ . ' updateProduct() updates parameters are not found!');
-            }
-
-            $product = new Product(
-                $id,
-                $name,
-                $price,
-                $size,
-                $type
-            );
-
-            $product = $this->productService->update($product, $this->user);
-
-            return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($product->getProductArray());
-
-        } catch(\LogicException $exception) {
-
-            error_log($exception->getMessage());
-            $code = 400;
-
-            if ($exception->getCode() === 404) {
-                $code = 404;
-            }
-
-            return $response
-
-                ->withStatus($code)
-                ->withHeader('Content-Type', 'application/json');
+        $id = $this->validateVar(trim($args['id']), 'int', 'id');
+        if ($this->productService->getOne($id, $this->user) === null) {
+            throw new \LogicException("product with id {$id} not found!", 404);
         }
+
+        $name = null;
+        //проверяем имя на уникальность
+        if (isset($bodyParams['name'])) {
+            $name = $this->validateVar(trim($bodyParams['name']), 'string)', 'name');
+        }
+
+        $price = null;
+        if (isset($bodyParams['price'])) {
+            $price = $this->validateVar(trim($bodyParams['price']), 'float', 'price');
+        }
+
+        $size = null;
+        //если продукт участвовал в перемещениях, мы не можеим изменить его размер
+        if (isset($bodyParams['size'])) {
+            $size = $this->validateVar(trim($bodyParams['size']), 'int', 'size');
+        }
+
+        $type = null;
+        if (isset($bodyParams['type'])) {
+            $type = $this->validateVar(trim($bodyParams['type']), 'string', 'type');
+        }
+
+        if ($name === null && $price === null && $size === null  && $type === null ) {
+            throw new \LogicException('updates parameters are not found!', 400);
+        }
+
+        $product = new Product(
+            $id,
+            $name,
+            $price,
+            $size,
+            $type
+        );
+
+        $product = $this->productService->update($product, $this->user);
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($product->getProductArray());
     }
 
     /**
@@ -180,33 +154,22 @@ class ProductController extends BaseController
      */
     public function deleteProduct(Request $request, Response $response, $args)
     {
-        try {
-            $this->initUser($request);
-            $id = $this->validateVar(trim($args['id']), 'int');
-            if ($this->productService->getOne($id, $this->user) === null) {
-                throw new \LogicException(__CLASS__ . ' deleteProduct () product with id ' . $id . ' not found!', 404);
-            }
+        $this->initUser($request);
+        $id = $this->validateVar(trim($args['id']), 'int', 'id');
 
-            //проверить участвовал ли протукт в перемещениях
-            $this->productService->remove($id);
-
-            return $response
-                ->withStatus(204)
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch(\LogicException $exception) {
-
-            error_log($exception->getMessage());
-            $code = 400;
-
-            if ($exception->getCode() === 404) {
-                $code = 404;
-            }
-
-            return $response
-                ->withStatus($code)
-                ->withHeader('Content-Type', 'application/json');
+        if ($this->productService->getOne($id, $this->user) === null) {
+            throw new \LogicException("product with id {$id} not found!", 404);
         }
+
+        if ($this->transactionService->getMovementsByProduct($id) !== null) {
+            throw new \LogicException("product with id {$id} already participated in the movements", 400);
+        }
+
+        $this->productService->remove($id);
+
+        return $response
+            ->withStatus(204)
+            ->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -218,33 +181,18 @@ class ProductController extends BaseController
      */
     public function getProduct(Request $request, Response $response, $args)
     {
-        try {
-            $this->initUser($request);
+        $this->initUser($request);
 
-            $id = $this->validateVar(trim($args['id']), 'int');
-            $product = $this->productService->getOne($id, $this->user);
-            if ($product === null) {
-                throw new \LogicException(__CLASS__ . ' getProduct() product with id ' . $id . ' not found!', 404);
-            }
-
-            return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($product->getProductArray());
-
-        } catch(\LogicException $exception) {
-
-            error_log($exception->getMessage());
-            $code = 400;
-
-            if ($exception->getCode() === 404) {
-                $code = 404;
-            }
-
-            return $response
-                ->withStatus($code)
-                ->withHeader('Content-Type', 'application/json');
+        $id = $this->validateVar(trim($args['id']), 'int', 'id');
+        $product = $this->productService->getOne($id, $this->user);
+        if ($product === null) {
+            throw new \LogicException("product with id {$id} not found!", 404);
         }
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($product->getProductArray());
     }
 
     /**
@@ -255,123 +203,89 @@ class ProductController extends BaseController
      */
     public function getAllProducts(Request $request, Response $response)
     {
-        try {
+        //добавить лимит?
+        $this->initUser($request);
+        $products = $this->productService->getAll($this->user);
+        $productsArray = [];
 
-            //добавить лимит?
-            $this->initUser($request);
-            $products = $this->productService->getAll($this->user);
-            $productsArray = [];
-
-            foreach ($products as $product) {
-                $productsArray[] = $product->getProductArray();
-            }
-
-            return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($productsArray);
-
-        } catch(\LogicException $exception) {
-
-            error_log($exception->getMessage());
-
-            return $response
-                ->withStatus(404)
-                ->withHeader('Content-Type', 'application/json');
+        foreach ($products as $product) {
+            $productsArray[] = $product->getProductArray();
         }
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($productsArray);
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     *
+     * @return Response
+     */
     public function getResidues(Request $request, Response $response, $args)
     {
-        try {
-            $this->initUser($request);
-            $productId = $this->validateVar(trim($args['id']), 'int');
+        $this->initUser($request);
+        $productId = $this->validateVar(trim($args['id']), 'int', 'id');
 
-            if ($this->productService->getOne($productId, $this->user) === null) {
-                throw new \LogicException(__CLASS__ . ' getResidues() product with id ' . $productId . ' not found!', 404);
-            }
-
-            $products = $this->stateService->getResiduesByProduct($productId);
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($products);
-
-        } catch (\LogicException $exception) {
-
-            error_log($exception->getMessage());
-            $code = 400;
-
-            if ($exception->getCode() === 404) {
-                $code = 404;
-            }
-
-            return $response
-                ->withStatus($code)
-                ->withHeader('Content-Type', 'application/json');
+        if ($this->productService->getOne($productId, $this->user) === null) {
+            throw new \LogicException("product with id {$productId} not found!", 404);
         }
+
+        $products = $this->stateService->getResiduesByProduct($productId);
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($products);
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     *
+     * @return Response
+     */
     public function getResiduesForDate(Request $request, Response $response, $args)
     {
-        try {
-            $this->initUser($request);
-            $productId = $this->validateVar(trim($args['id']), 'int');
-            $date = $this->validateVar(trim($args['date']), 'date');
+        $this->initUser($request);
+        $productId = $this->validateVar(trim($args['id']), 'int', 'id');
+        $date = $this->validateVar(trim($args['date']), 'date', 'date');
 
-            if ($this->productService->getOne($productId, $this->user) === null) {
-                throw new \LogicException(__CLASS__ . ' getResiduesForDate() product with id ' . $productId . ' not found!', 404);
-            }
-
-            $products = $this->stateService->getResiduesByProductForDate($productId, $date);
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($products);
-
-        } catch (\LogicException $exception) {
-
-            error_log($exception->getMessage());
-            $code = 400;
-
-            if ($exception->getCode() === 404) {
-                $code = 404;
-            }
-
-            return $response
-                ->withStatus($code)
-                ->withHeader('Content-Type', 'application/json');
+        if ($this->productService->getOne($productId, $this->user) === null) {
+            throw new \LogicException("product with id {$productId} not found!", 404);
         }
+
+        $products = $this->stateService->getResiduesByProductForDate($productId, $date);
+
+        return $response
+            ->withStatus(201)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($products);
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     *
+     * @return Response
+     */
     public function getMovements(Request $request, Response $response, $args)
     {
-        try {
-            $this->initUser($request);
-            $productId = $this->validateVar(trim($args['id']), 'int');
+        $this->initUser($request);
+        $productId = $this->validateVar(trim($args['id']), 'int', 'id');
 
-            if ($this->productService->getOne($productId, $this->user) === null) {
-                throw new \LogicException(__CLASS__ . ' getResidues() product with id ' . $productId . ' not found!', 404);
-            }
-
-            $transactions = $this->transactionService->getMovementsByProduct($productId);
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($transactions);
-
-        } catch (\LogicException $exception) {
-
-            error_log($exception->getMessage());
-            $code = 400;
-
-            if ($exception->getCode() === 404) {
-                $code = 404;
-            }
-
-            return $response
-                ->withStatus($code)
-                ->withHeader('Content-Type', 'application/json');
+        if ($this->productService->getOne($productId, $this->user) === null) {
+            throw new \LogicException("getResidues() product with id {$productId} ' not found!", 404);
         }
+
+        $transactions = $this->transactionService->getMovementsByProduct($productId);
+        return $response
+            ->withStatus(201)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($transactions);
     }
 }

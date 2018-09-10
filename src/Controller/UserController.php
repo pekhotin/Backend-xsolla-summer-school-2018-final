@@ -17,51 +17,41 @@ class UserController extends BaseController
      */
     public function register(Request $request, Response $response)
     {
-        try {
-            $bodyParams = $request->getParsedBody();
-            $login = $this->validateVar(trim($bodyParams['login']), 'string');
-            $name = $this->validateVar(trim($bodyParams['name']), 'string');
-            $surname = $this->validateVar(trim($bodyParams['surname']), 'string');
-            $organization = $this->validateVar(trim($bodyParams['organization']), 'string');
-            $email = $this->validateVar(trim($bodyParams['email']), 'email');
-            $password = $this->validateVar(trim($bodyParams['password']), 'string');
-            $phoneNumber = $this->validateVar(trim($bodyParams['phoneNumber']), 'string');;
+        $bodyParams = $request->getParsedBody();
+        $login = $this->validateVar(trim($bodyParams['login']), 'string', 'login');
+        $name = $this->validateVar(trim($bodyParams['name']), 'string', 'name');
+        $surname = $this->validateVar(trim($bodyParams['surname']), 'string', 'surname');
+        $organization = $this->validateVar(trim($bodyParams['organization']), 'string', 'organization');
+        $email = $this->validateVar(trim($bodyParams['email']), 'email', 'email');
+        $password = $this->validateVar(trim($bodyParams['password']), 'string', 'password');
+        $phoneNumber = $this->validateVar(trim($bodyParams['phoneNumber']), 'string', 'phoneNumber');;
 
-            if ($this->userService->getOneByNameAndOrg($name, $surname, $organization) !== null) {
-                throw new \LogicException(__CLASS__ . " register() user {$name} {$surname} is exist in organization {$organization}!");
-            }
-            if ($this->userService->getOneByLogin($login) !== null) {
-                throw new \LogicException(__CLASS__ . " register() user with login {$login} is exist!");
-            }
-            if ($this->userService->getOneByEmail($email) !== null) {
-                throw new \LogicException(__CLASS__ . " register() user with email {$email} is exist!");
-            }
-
-            $user = new User(
-                null,
-                $login,
-                $name,
-                $surname,
-                password_hash($password, PASSWORD_DEFAULT),
-                $organization,
-                $email,
-                $phoneNumber
-            );
-
-            $this->userService->add($user);
-
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->withJson($user->getUserArray());
-
-        } catch(\LogicException $exception) {
-
-            error_log($exception->getMessage());
-
-            return $response
-                ->withStatus(400)
-                ->withHeader('Content-Type', 'application/json');
+        if ($this->userService->getOneByNameAndOrg($name, $surname, $organization) !== null) {
+            throw new \LogicException("user {$name} {$surname} is exist in organization {$organization}!", 400);
         }
+        if ($this->userService->getOneByLogin($login) !== null) {
+            throw new \LogicException("user with login {$login} is exist!", 400);
+        }
+        if ($this->userService->getOneByEmail($email) !== null) {
+            throw new \LogicException("user with email {$email} is exist!", 400);
+        }
+
+        $user = new User(
+            null,
+            $login,
+            $name,
+            $surname,
+            password_hash($password, PASSWORD_DEFAULT),
+            $organization,
+            $email,
+            $phoneNumber
+        );
+
+        $this->userService->add($user);
+
+        return $response
+            ->withStatus(201)
+            ->withHeader('Content-Type', 'application/json')
+            ->withJson($user->getUserArray());
     }
 }
