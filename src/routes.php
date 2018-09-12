@@ -3,6 +3,9 @@
 $app->group('/api/v1', function () use ($app) {
 
     $app->post('/users', 'user.controller:register');
+    $app->get('/me', 'user.controller:getMe');
+    $app->put('/me', 'user.controller:updateMe');
+    $app->delete('/me', 'user.controller:deleteMe');
 
     $app->get('/warehouses', 'warehouse.controller:getAllWarehouses');
     $app->get('/warehouses/{id}', 'warehouse.controller:getWarehouse');

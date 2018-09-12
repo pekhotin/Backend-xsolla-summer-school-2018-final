@@ -17,17 +17,14 @@ class ProductController extends BaseController
      * @var ProductService
      */
     private $productService;
-
     /**
      * @var StateService
      */
     private $stateService;
-
     /**
      * @var TransactionService
      */
     private $transactionService;
-
     /**
      * ProductController constructor.
      *
@@ -50,7 +47,6 @@ class ProductController extends BaseController
         $this->stateService = $stateService;
         $this->transactionService = $transactionService;
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -80,7 +76,6 @@ class ProductController extends BaseController
 
         return $response->withJson($product->getProductArray(), 201);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -113,6 +108,9 @@ class ProductController extends BaseController
         //если продукт участвовал в перемещениях, мы не можеим изменить его размер
         if (isset($bodyParams['size'])) {
             $size = $this->validateVar(trim($bodyParams['size']), 'int', 'size');
+            if ($this->transactionService->getMovementsByProduct($id) !== null) {
+                throw new \LogicException("product with id {$id} already participated in the movements", 400);
+            }
         }
 
         $type = null;
@@ -136,7 +134,6 @@ class ProductController extends BaseController
 
         return $response->withJson($product->getProductArray(), 200);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -163,7 +160,6 @@ class ProductController extends BaseController
 
         return $response->withStatus(204);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -183,7 +179,6 @@ class ProductController extends BaseController
 
         return $response->withJson($product->getProductArray(), 200);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -223,7 +218,6 @@ class ProductController extends BaseController
         $products = $this->stateService->getResiduesByProduct($productId);
         return $response->withJson($products, 200);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -245,7 +239,6 @@ class ProductController extends BaseController
 
         return $response->withJson($products, 200);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -263,7 +256,6 @@ class ProductController extends BaseController
         }
 
         $transactions = $this->transactionService->getMovementsByProduct($productId);
-
-        return $response->withJson($transactions, 200);
+        return $response->withJson($transactions);
     }
 }

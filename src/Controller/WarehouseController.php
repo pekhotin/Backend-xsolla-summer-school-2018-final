@@ -63,10 +63,13 @@ class WarehouseController extends BaseController
      */
     public function addWarehouse(Request $request, Response $response)
     {
-            $this->initUser($request);
-            $bodyParams = $request->getParsedBody();
-            $address = $this->validateVar(trim($bodyParams['address']), 'string', 'address');
-            $capacity = $this->validateVar(trim($bodyParams['capacity']), 'int', 'capacity');
+        $this->initUser($request);
+        $bodyParams = $request->getParsedBody();
+        $warehouses = $bodyParams['warehouses'];
+
+        foreach ($warehouses as $warehouse) {
+            $address = $this->validateVar(trim($warehouse['address']), 'string', 'address');
+            $capacity = $this->validateVar(trim($warehouse['capacity']), 'int', 'capacity');
 
             $warehouse = new Warehouse(
                 null,
@@ -77,10 +80,11 @@ class WarehouseController extends BaseController
             if ($this->warehouseService->getOneByAddress($address, $this->user) !== null) {
                 throw new \LogicException("warehouse with address {$address} already exists!", 400);
             }
+        }
 
-            $this->warehouseService->add($warehouse, $this->user);
+        $this->warehouseService->add($warehouse, $this->user);
 
-            return $response->withJson($warehouse->getWarehouseArray(), 201);
+        return $response->withJson($warehouse->getWarehouseArray(), 201);
     }
     /**
      * @param Request $request

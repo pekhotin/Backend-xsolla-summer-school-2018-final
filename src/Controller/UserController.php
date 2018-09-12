@@ -24,7 +24,7 @@ class UserController extends BaseController
         $organization = $this->validateVar(trim($bodyParams['organization']), 'string', 'organization');
         $email = $this->validateVar(trim($bodyParams['email']), 'email', 'email');
         $password = $this->validateVar(trim($bodyParams['password']), 'string', 'password');
-        $phoneNumber = $this->validateVar(trim($bodyParams['phoneNumber']), 'string', 'phoneNumber');;
+        $phoneNumber = $this->validateVar(trim($bodyParams['phoneNumber']), 'string', 'phoneNumber');
 
         if ($this->userService->getOneByNameAndOrg($name, $surname, $organization) !== null) {
             throw new \LogicException("user {$name} {$surname} is exist in organization {$organization}!", 400);
@@ -50,5 +50,81 @@ class UserController extends BaseController
         $this->userService->add($user);
 
         return $response->withJson($user->getUserArray(), 201);
+    }
+    /**
+     * @param Request $request
+     * @param Response $response
+     *
+     * @return Response
+     */
+    public function getMe(Request $request, Response $response)
+    {
+        $this->initUser($request);
+        return $response->withJson($this->user->getUserArray(), 201);
+    }
+    /**
+     * @param Request $request
+     * @param Response $response
+     *
+     * @return Response
+     */
+    public function updateMe(Request $request, Response $response)
+    {
+        $this->initUser($request);
+        $bodyParams = $request->getParsedBody();
+        $values = [];
+
+        $values['name'] = isset($bodyParams['name'])
+            ? $this->validateVar($bodyParams['name'], 'string', 'name')
+            : $this->user->getName();
+        $values['surname'] = isset($bodyParams['surname'])
+            ? $this->validateVar($bodyParams['surname'], 'string', 'surname')
+            : $this->user->getSurname();
+        $values['login'] = isset($bodyParams['login'])
+            ? $this->validateVar($bodyParams['login'], 'string', 'login')
+            : $this->user->getLogin();
+        $values['organization'] = isset($bodyParams['organisation'])
+            ? $this->validateVar($bodyParams['organisation'], 'string', 'organisation')
+            : $this->user->getOrganization();
+        $values['email'] = isset($bodyParams['email'])
+            ? $this->validateVar($bodyParams['email'], 'email', 'email')
+            : $this->user->getEmail();
+        $values['hash'] = isset($bodyParams['password'])
+            ? password_hash($this->validateVar($bodyParams['password'], 'string', 'password'), PASSWORD_DEFAULT)
+            : $this->user->getPasswordHash();
+        $values['phoneNumber'] = isset($bodyParams['phoneNumber'])
+            ? $this->validateVar($bodyParams['phoneNumber'], 'string', 'phoneNumber')
+            : $this->user->getPhoneNumber();
+
+        if ($this->userService->getOneByNameAndOrg($values['name'], $values['surname'], $values['organization'], $this->user->getId()) !== null) {
+            throw new \LogicException("user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}!", 400);
+        }
+        if ($this->userService->getOneByLogin($values['login'], $this->user->getId()) !== null ) {
+            throw new \LogicException("user with login {$values['login']} is exist!", 400);
+        }
+        if ($this->userService->getOneByEmail($values['email'], $this->user->getId()) !== null) {
+            throw new \LogicException("user with email {$values['email']} is exist!", 400);
+        }
+
+        // добавить проверку для номера телефона
+
+        $this->user = $this->userService->update($this->user, $values);
+        return $response->withJson($this->user->getUserArray(), 200);
+    }
+    /**
+     * @param Request $request
+     * @param Response $response
+     *
+     * @return Response
+     */
+    public function deleteMe(Request $request, Response $response)
+    {
+        $this->initUser($request);
+
+        $this->userService->delete($this->user);
+
+        return $response
+            ->withStatus(204)
+            ->withHeader('Content-Type', 'application/json');
     }
 }

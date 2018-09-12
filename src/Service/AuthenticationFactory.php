@@ -20,7 +20,7 @@ class AuthenticationFactory
                 'table' => 'Users',
                 'user'=> 'login'
             ]),
-            'path' => '/api/v1',
+            'path' => ['/api/v1'],
             'secure' => false,
             'ignore' => '/api/v1/users',
             'before' => function ($request, $arg) {

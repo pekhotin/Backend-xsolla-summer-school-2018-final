@@ -32,9 +32,11 @@ class ProductRepository extends AbstractRepository
             $row['type']
         );
     }
+
     /**
      * @param Product $product
      * @param User $user
+     * @throws \Doctrine\DBAL\ConnectionException
      */
     public function insert($product, $user)
     {
@@ -47,9 +49,10 @@ class ProductRepository extends AbstractRepository
         ];
 
         $this->dbConnection->insert(
-            'Products',
+            'Product',
             $values
         );
+        $this->dbConnection->commit();
 
         $product->setId($this->dbConnection->lastInsertId());
     }
@@ -92,7 +95,7 @@ class ProductRepository extends AbstractRepository
         }
 
         $this->dbConnection->update(
-            'Products',
+            'mvc.Products',
             $values,
             [
                 'id' => $product->getId(),

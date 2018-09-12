@@ -17,10 +17,10 @@ class UserService
      *
      * @param UserRepository $userRepository
      */
-    public function __construct(UserRepository $userRepository) {
+    public function __construct(UserRepository $userRepository)
+    {
         $this->userRepository = $userRepository;
     }
-
     /**
      * @param User $user
      */
@@ -28,37 +28,50 @@ class UserService
     {
         $this->userRepository->insert($user);
     }
-
     /**
      * @param string $login
-     *
+     * @param int $userId
      * @return User|null
      */
-    public function getOneByLogin(string $login)
+    public function getOneByLogin(string $login, int $userId = 0)
     {
-        return $this->userRepository->findByLogin($login);
+        return $this->userRepository->findByLogin($login, $userId);
     }
-
     /**
      * @param string $email
+     * @param int $userId
      *
      * @return User|null
      */
-    public function getOneByEmail(string $email)
+    public function getOneByEmail(string $email, int $userId = 0)
     {
-        return $this->userRepository->findByEmail($email);
+        return $this->userRepository->findByEmail($email, $userId);
+    }
+    /**
+     * @param string $name
+     * @param string $surname
+     * @param string $organization
+     * @param int $userId
+     *
+     * @return User|null
+     */
+    public function getOneByNameAndOrg(string $name, string $surname, string $organization, int $userId = 0)
+    {
+        return $this->userRepository->findByNameAndOrg($name, $surname, $organization, $userId);
+    }
+    /**
+     * @param User $user
+     * @param array $values
+     *
+     * @return User
+     */
+    public function update(User $user, $values)
+    {
+        return $this->userRepository->update($user, $values);
     }
 
-
-    /**
-     * @param $name
-     * @param $surname
-     * @param $organization
-     *
-     * @return User|null
-     */
-    public function getOneByNameAndOrg(string $name, string $surname, string $organization)
+    public function delete(User $user)
     {
-        return $this->userRepository->findByNameAndOrg($name, $surname, $organization);
+        $this->userRepository->delete($user);
     }
 }

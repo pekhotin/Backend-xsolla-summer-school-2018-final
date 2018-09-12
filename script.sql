@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS `mvc`.`Products` (
   CONSTRAINT `UserProduct`
     FOREIGN KEY (`userId`)
     REFERENCES `mvc`.`Users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS `mvc`.`Warehouses` (
   CONSTRAINT `UserWarehouse`
     FOREIGN KEY (`userId`)
     REFERENCES `mvc`.`Users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
@@ -82,13 +82,13 @@ CREATE TABLE IF NOT EXISTS `mvc`.`State` (
   CONSTRAINT `Product`
     FOREIGN KEY (`productId`)
     REFERENCES `mvc`.`Products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `WarehouseState`
     FOREIGN KEY (`warehouseId`)
     REFERENCES `mvc`.`Warehouses` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
@@ -110,7 +110,17 @@ CREATE TABLE IF NOT EXISTS `mvc`.`Transactions` (
   CONSTRAINT `ProductTransaction`
     FOREIGN KEY (`productId`)
     REFERENCES `mvc`.`Products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
+
+CREATE USER 'non-root'@'%' IDENTIFIED BY '12345';
+
+GRANT SELECT, INSERT, DELETE, UPDATE ON mvc.Users TO 'non-root'@'%';
+GRANT SELECT, INSERT, DELETE, UPDATE ON mvc.Products TO 'non-root'@'%';
+GRANT SELECT, INSERT, DELETE, UPDATE ON mvc.Warehouses TO 'non-root'@'%';
+GRANT SELECT, INSERT, DELETE ON mvc.Transactions TO 'non-root'@'%';
+GRANT SELECT, INSERT, DELETE ON mvc.State TO 'non-root'@'%';
+
+FLUSH PRIVILEGES;
