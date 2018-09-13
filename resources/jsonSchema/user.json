@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "login": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "surname": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "organization": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "login",
+    "name",
+    "surname",
+    "password",
+    "organization",
+    "email",
+    "phoneNumber"
+  ]
+}

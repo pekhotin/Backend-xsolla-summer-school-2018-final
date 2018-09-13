@@ -29,4 +29,6 @@ $app->group('/api/v1', function () use ($app) {
     $app->get('/products/{id}/residues', 'product.controller:getResidues');
     $app->get('/products/{id}/residues/{date}', 'product.controller:getResiduesForDate');
     $app->get('/products/{id}/movements', 'product.controller:getMovements');
+
+    $app->get('/new', 'new.controller:getConnect');
 });

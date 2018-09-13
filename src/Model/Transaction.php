@@ -167,4 +167,17 @@ class Transaction
             'recipient' => $this->recipient
         ];
     }
+
+    public function getTransactionInfo()
+    {
+        return [
+            'transactionId' => $this->id,
+            'productId' => $this->productId,
+            'quantity' => $this->quantity,
+            'direction' => $this->direction,
+            'datetime' => $this->datetime,
+            'sender' => $this->sender,
+            'recipient' => $this->recipient
+        ];
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Model\Transaction;
 use App\Repository\StateRepository;
 
 class StateService
@@ -22,25 +23,21 @@ class StateService
     }
 
     /**
-     * @param int $productId
+     * @param Transaction[] $transactions
      * @param int $warehouseId
-     * @param int $quantity
      */
-    public function addProducts($warehouseId, $productId, $quantity)
+    public function addProducts($transactions, $warehouseId)
     {
-        $this->stateRepository->addProducts($warehouseId, $productId, $quantity);
+        $this->stateRepository->addProducts($transactions, $warehouseId);
     }
 
     /**
+     * @param Transaction[] $transactions
      * @param int $warehouseId
-     * @param int $productId
-     * @param int $quantity
-     * 
-     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function removeProducts($warehouseId, $productId, $quantity)
+    public function removeProducts($transactions, $warehouseId)
     {
-        $this->stateRepository->removeProducts($warehouseId, $productId, $quantity);
+        $this->stateRepository->removeProducts($transactions, $warehouseId);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Model\Transaction;
+
 class StateRepository extends AbstractRepository
 {
     /**
@@ -12,7 +14,7 @@ class StateRepository extends AbstractRepository
      */
     public function getTodayQuantity($warehouseId, $productId)
     {
-        return (int)$this->dbConnection->fetchColumn(
+        $quantity = $this->dbConnection->fetchColumn(
             'SELECT quantity FROM State WHERE warehouseId = ? AND productId = ? AND date = ?',
             [
                 $warehouseId,
@@ -20,7 +22,10 @@ class StateRepository extends AbstractRepository
                 date('Y-m-d')
             ]
         );
-
+        if ($quantity === false) {
+            return -1;
+        }
+        return (int)$quantity;
     }
     /**
      * @param int $warehouseId
@@ -30,13 +35,18 @@ class StateRepository extends AbstractRepository
      */
     public function getLastQuantity($warehouseId, $productId)
     {
-        return (int)$this->dbConnection->fetchColumn(
+        $quantity = $this->dbConnection->fetchColumn(
             'SELECT quantity FROM State WHERE warehouseId = ? AND productId = ? ORDER BY date DESC',
             [
                 $warehouseId,
                 $productId
             ]
         );
+
+        if ($quantity === false) {
+            return -1;
+        }
+        return (int)$quantity;
 
     }
     /**
@@ -90,49 +100,77 @@ class StateRepository extends AbstractRepository
             ]
         );
     }
-    /**
-     * @param int $warehouseId
-     * @param int $productId
-     * @param int $quantity
-     */
-    public function addProducts($warehouseId, $productId, $quantity)
-    {
-        $todayQuantity = $this->getTodayQuantity($warehouseId, $productId);
 
-        if ($todayQuantity > 0) {
-            $this->update($warehouseId, $productId,$quantity + $todayQuantity);
-        } else {
-            $lastQuantity = $this->getLastQuantity($warehouseId, $productId);
-            if ($lastQuantity > 0){
-                $this->insert($warehouseId, $productId, $lastQuantity + $quantity);
+    /**
+     * @param Transaction[] $transactions
+     * @param int $warehouseId
+     */
+    public function addProducts($transactions, $warehouseId)
+    {
+        foreach ($transactions as $transaction) {
+            $productId = $transaction->getProductId();
+            $quantity = $transaction->getQuantity();
+            $todayQuantity = $this->getTodayQuantity($warehouseId, $productId);
+
+            if ($todayQuantity >= 0) {
+                $this->update($warehouseId, $productId, $quantity + $todayQuantity);
             } else {
-                $this->insert($warehouseId, $productId, $quantity);
+                $lastQuantity = $this->getLastQuantity($warehouseId, $productId);
+                if ($lastQuantity > 0) {
+                    $this->insert($warehouseId, $productId, $lastQuantity + $quantity);
+                } else {
+                    $this->insert($warehouseId, $productId, $quantity);
+                }
             }
         }
     }
-    /**
-     * @param int $warehouseId
-     * @param int $productId
-     * @param int $quantity
-     */
-    public function removeProducts($warehouseId, $productId, $quantity)
-    {
-        $todayQuantity = $this->getTodayQuantity($warehouseId, $productId);
 
-        if ($todayQuantity > 0) {
-            $this->update($warehouseId,$productId, $todayQuantity - $quantity);
-        } else {
-            $lastQuantity = $this->getLastQuantity($warehouseId, $productId);
-            if ($lastQuantity > 0) {
-                $this->insert($warehouseId, $productId, $lastQuantity - $quantity);
-            }
-        }
-    }
     /**
+     * @param Transaction[] $transactions
      * @param int $warehouseId
-     * @param int $productId
-     * @param int $quantity
-     * @param int $newWarehouseId
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
+     */
+    public function removeProducts($transactions, $warehouseId)
+    {
+        $this->dbConnection->beginTransaction();
+        try {
+            foreach ($transactions as $transaction) {
+                $productId = $transaction->getProductId();
+                $quantity = $transaction->getQuantity();
+                $todayQuantity = $this->getTodayQuantity($warehouseId, $productId);
+
+                if ($todayQuantity > 0) {
+                    $this->update($warehouseId, $productId, $todayQuantity - $quantity);
+
+                } else {
+                    $lastQuantity = $this->getLastQuantity($warehouseId, $productId);
+                    if ($lastQuantity > 0) {
+                        $this->insert($warehouseId, $productId, $lastQuantity - $quantity);
+                    }
+                }
+
+                if ($this->getLastQuantity($warehouseId, $productId) < 0) {
+                    throw new \LogicException(
+                        'not enough product in warehouse!',
+                        400
+                    );
+                }
+            }
+            $this->dbConnection->commit();
+        } catch (\Exception $e) {
+            $this->dbConnection->rollBack();
+            throw new $e;
+        }
+
+    }
+
+    /**
+     * @param $warehouseId
+     * @param $productId
+     * @param $quantity
+     * @param $newWarehouseId
+     * @throws \Exception
      */
     public function movementProducts($warehouseId, $productId, $quantity, $newWarehouseId)
     {

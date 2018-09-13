@@ -7,16 +7,18 @@ use App\Model\Transaction;
 class TransactionRepository extends AbstractRepository
 {
     /**
-     * @param Transaction $transaction
+     * @param Transaction[] $transactions
      */
-    public function insert(Transaction $transaction)
+    public function insert($transactions)
     {
-        $this->dbConnection->insert(
-            'Transactions',
-            $transaction->getTransactionArray()
-        );
+        foreach ($transactions as $transaction) {
+            $this->dbConnection->insert(
+                'Transactions',
+                $transaction->getTransactionArray()
+            );
 
-        $transaction->setId($this->dbConnection->lastInsertId());
+            $transaction->setId($this->dbConnection->lastInsertId());
+        }
     }
     /**
      * @param int $warehouseId

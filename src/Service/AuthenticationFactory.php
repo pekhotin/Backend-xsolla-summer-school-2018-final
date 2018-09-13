@@ -22,7 +22,7 @@ class AuthenticationFactory
             ]),
             'path' => ['/api/v1'],
             'secure' => false,
-            'ignore' => '/api/v1/users',
+            'ignore' => ['/api/v1/users', '/api/v1/new'],
             'before' => function ($request, $arg) {
                 return $request->withAttribute('user', $arg['user']);
             }

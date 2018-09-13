@@ -17,7 +17,6 @@ use App\Service\{
     TransactionService,
     AuthenticationFactory
 };
-
 use App\Repository\{
     WarehouseRepository,
     ProductRepository,

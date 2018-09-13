@@ -23,11 +23,11 @@ class TransactionService
     }
 
     /**
-     * @param Transaction $transaction
+     * @param Transaction[] $transactions
      */
-    public function add($transaction)
+    public function add($transactions)
     {
-        $this->transactionRepository->insert($transaction);
+        $this->transactionRepository->insert($transactions);
     }
 
     /**

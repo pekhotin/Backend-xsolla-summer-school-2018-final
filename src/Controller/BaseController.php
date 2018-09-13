@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Service\JsonSchemaValidator;
+use JsonSchema\Validator;
 use Slim\App;
 use App\Service\UserService;
 use Slim\Http\Request;
@@ -23,6 +25,10 @@ abstract class BaseController
      * @var User
      */
     protected $user;
+    /**
+     * @var JsonSchemaValidator
+     */
+    protected $jsonSchemaValidator;
 
     /**
      * BaseController constructor.
@@ -34,6 +40,9 @@ abstract class BaseController
     {
         $this->app = $app;
         $this->userService = $userService;
+        $this->jsonSchemaValidator = new JsonSchemaValidator(
+            new Validator()
+        );
     }
 
     protected function initUser(Request $request)

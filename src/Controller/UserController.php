@@ -18,6 +18,8 @@ class UserController extends BaseController
     public function register(Request $request, Response $response)
     {
         $bodyParams = $request->getParsedBody();
+        $this->jsonSchemaValidator->checkBySchema($bodyParams, __DIR__ . '/../../resources/jsonSchema/user.json');
+
         $login = $this->validateVar(trim($bodyParams['login']), 'string', 'login');
         $name = $this->validateVar(trim($bodyParams['name']), 'string', 'name');
         $surname = $this->validateVar(trim($bodyParams['surname']), 'string', 'surname');
@@ -27,13 +29,20 @@ class UserController extends BaseController
         $phoneNumber = $this->validateVar(trim($bodyParams['phoneNumber']), 'string', 'phoneNumber');
 
         if ($this->userService->getOneByNameAndOrg($name, $surname, $organization) !== null) {
-            throw new \LogicException("user {$name} {$surname} is exist in organization {$organization}!", 400);
+            throw new \LogicException(
+                "user {$name} {$surname} is exist in organization {$organization}!",
+                400
+            );
         }
         if ($this->userService->getOneByLogin($login) !== null) {
-            throw new \LogicException("user with login {$login} is exist!", 400);
+            throw new \LogicException(
+                "user with login {$login} is exist!",
+                400);
         }
         if ($this->userService->getOneByEmail($email) !== null) {
-            throw new \LogicException("user with email {$email} is exist!", 400);
+            throw new \LogicException(
+                "user with email {$email} is exist!",
+                400);
         }
 
         $user = new User(
@@ -96,14 +105,27 @@ class UserController extends BaseController
             ? $this->validateVar($bodyParams['phoneNumber'], 'string', 'phoneNumber')
             : $this->user->getPhoneNumber();
 
-        if ($this->userService->getOneByNameAndOrg($values['name'], $values['surname'], $values['organization'], $this->user->getId()) !== null) {
-            throw new \LogicException("user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}!", 400);
+        if ($this->userService->getOneByNameAndOrg(
+            $values['name'],
+            $values['surname'],
+            $values['organization'],
+            $this->user->getId()) !== null
+        ) {
+            throw new \LogicException(
+                "user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}!",
+                400
+            );
         }
         if ($this->userService->getOneByLogin($values['login'], $this->user->getId()) !== null ) {
-            throw new \LogicException("user with login {$values['login']} is exist!", 400);
+            throw new \LogicException(
+                "user with login {$values['login']} is exist!",
+                400
+            );
         }
         if ($this->userService->getOneByEmail($values['email'], $this->user->getId()) !== null) {
-            throw new \LogicException("user with email {$values['email']} is exist!", 400);
+            throw new \LogicException(
+                "user with email {$values['email']} is exist!",
+                400);
         }
 
         // добавить проверку для номера телефона

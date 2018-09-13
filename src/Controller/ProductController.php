@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Service\StateService;
 use App\Service\TransactionService;
 use App\Service\UserService;
+use JsonSchema\Validator;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -57,9 +58,9 @@ class ProductController extends BaseController
     {
         $this->initUser($request);
         $bodyParams = $request->getParsedBody();
-        //json схема
+        $this->jsonSchemaValidator->checkBySchema($bodyParams, __DIR__ . '/../../resources/jsonSchema/product.json');
+
         $name = $this->validateVar(trim($bodyParams['name']), 'string', 'name');
-        //проверить имя на уникальность
         $price = $this->validateVar(trim($bodyParams['price']), 'float', 'price');
         $size = $this->validateVar(trim($bodyParams['size']), 'int', 'size');
         $type = $this->validateVar(trim($bodyParams['type']), 'string', 'type');
@@ -187,7 +188,6 @@ class ProductController extends BaseController
      */
     public function getAllProducts(Request $request, Response $response)
     {
-        //добавить лимит?
         $this->initUser($request);
         $products = $this->productService->getAll($this->user);
         $productsArray = [];
