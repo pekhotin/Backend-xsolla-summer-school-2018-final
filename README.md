@@ -17,7 +17,7 @@
 - email - адрес электронной почты
 - phoneNumber - номер телефона
 
-Ограничения: 
+#### Ограничения: 
 - двух человек с одинаковым именем в одной организации быть не может
 - один email не может использоваться более чем одним пользователем
 
@@ -29,8 +29,21 @@
 	"surname": "Vedenina",
 	"password": "qwerty",
 	"organization": "PSU",
-	"email": "toma5@gmail.com",
+	"email": "toma@gmail.com",
 	"phoneNumber": "88005553535"
+}
+```
+#### Результат
+После успешного выполнения возвращает созданный объект
+```json
+{
+    "id": "7",
+    "login": "Toma",
+    "name": "Tamara",
+    "surname": "Vedenina",
+    "organization": "PSU",
+    "email": "toma5@gmail.com",
+    "phoneNumber": "88005553535"
 }
 ```
 
