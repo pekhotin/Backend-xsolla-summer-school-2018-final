@@ -65,6 +65,9 @@ abstract class BaseController
                 if (filter_var($var, FILTER_VALIDATE_INT) === false) {
                     throw new \LogicException("{$name} is not integer!", 400);
                 }
+                if ($var <= 0) {
+                    throw new \LogicException("{$name} must be greater than 0!", 400);
+                }
                 return (int)$var;
 
             case 'string':

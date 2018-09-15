@@ -11,9 +11,9 @@ class Transaction
      */
     private $id;
     /**
-     * @var int
+     * @var Product
      */
-    private $productId;
+    private $product;
     /**
      * @var int
      */
@@ -38,17 +38,17 @@ class Transaction
      * Transaction constructor.
      *
      * @param int $id
-     * @param int $productId
+     * @param Product $product
      * @param int $quantity
      * @param string $direction
      * @param string $datetime
      * @param string $sender
      * @param string $recipient
      */
-    public function __construct($id, $productId, $quantity, $direction, $datetime, $sender, $recipient)
+    public function __construct($id, $product, $quantity, $direction, $datetime, $sender, $recipient)
     {
         $this->id = $id;
-        $this->productId = $productId;
+        $this->product = $product;
         $this->quantity = $quantity;
         $this->direction = $direction;
         $this->datetime = $datetime;
@@ -70,18 +70,18 @@ class Transaction
         $this->id = $id;
     }
     /**
-     * @return int
+     * @return Product
      */
-    public function getProductId()
+    public function getProduct()
     {
-        return $this->productId;
+        return $this->product;
     }
     /**
-     * @param int $productId
+     * @param Product $product
      */
-    public function setProductId($productId)
+    public function setProduct($product)
     {
-        $this->productId = $productId;
+        $this->product = $product;
     }
     /**
      * @return int
@@ -159,7 +159,7 @@ class Transaction
     public function getTransactionArray()
     {
         return [
-            'productId' => $this->productId,
+            'productId' => $this->product->getId(),
             'quantity' => $this->quantity,
             'direction' => $this->direction,
             'datetime' => $this->datetime,
@@ -172,7 +172,7 @@ class Transaction
     {
         return [
             'transactionId' => $this->id,
-            'productId' => $this->productId,
+            'sku' => $this->product->getSku(),
             'quantity' => $this->quantity,
             'direction' => $this->direction,
             'datetime' => $this->datetime,

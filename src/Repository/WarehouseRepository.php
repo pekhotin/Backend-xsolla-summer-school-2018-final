@@ -48,12 +48,14 @@ class WarehouseRepository extends AbstractRepository
             ]
         );
 
-        if($row === false) return null;
+        if ($row === false) {
+            return null;
+        }
 
         return new Warehouse(
-            $row['id'],
-            $row['address'],
-            $row['capacity']
+            (int)$row['id'],
+            (string)$row['address'],
+            (int)$row['capacity']
         );
 
     }

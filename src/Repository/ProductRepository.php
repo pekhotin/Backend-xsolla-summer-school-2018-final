@@ -8,6 +8,32 @@ use App\Model\User;
 class ProductRepository extends AbstractRepository
 {
     /**
+     * @param int $sku
+     * @param User $user
+     *
+     * @return Product|null
+     */
+    public function findBySku($sku, $user)
+    {
+        $row = $this->dbConnection->fetchAssoc(
+            'SELECT * FROM Products WHERE sku = ? AND userId = ?',
+            [$sku, $user->getId()]
+        );
+
+        if ($row === false) {
+            return null;
+        }
+
+        return new Product(
+            (int)$row['id'],
+            (int)$row['sku'],
+            (string)$row['name'],
+            (float)$row['price'],
+            (int)$row['size'],
+            (string)$row['type']
+        );
+    }
+    /**
      * @param int $id
      * @param User $user
      *
@@ -25,11 +51,12 @@ class ProductRepository extends AbstractRepository
         }
 
         return new Product(
-            $row['id'],
-            $row['name'],
-            $row['price'],
-            $row['size'],
-            $row['type']
+            (int)$row['id'],
+            (int)$row['sku'],
+            (string)$row['name'],
+            (float)$row['price'],
+            (int)$row['size'],
+            (string)$row['type']
         );
     }
 
@@ -39,13 +66,8 @@ class ProductRepository extends AbstractRepository
      */
     public function insert($product, $user)
     {
-        $values = [
-            'name' => $product->getName(),
-            'price' => $product->getPrice(),
-            'size' => $product->getSize(),
-            'type' => $product->getType(),
-            'userId' => $user->getId()
-        ];
+        $values = $product->getProductArray();
+        $values['userId'] = $user->getId();
 
         $this->dbConnection->insert(
             'Products',
@@ -55,7 +77,7 @@ class ProductRepository extends AbstractRepository
         $product->setId($this->dbConnection->lastInsertId());
     }
     /**
-     * @param $productId
+     * @param int $productId
      *
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
@@ -76,24 +98,27 @@ class ProductRepository extends AbstractRepository
     {
         $values = [];
 
-        if($product->getName() !== null) {
+        if ($product->getSku() !== null) {
+            $values['sku'] = $product->getSku();
+        }
+        if ($product->getName() !== null) {
             $values['name'] = $product->getName();
         }
 
-        if($product->getPrice() !== null) {
+        if ($product->getPrice() !== null) {
             $values['price'] = $product->getPrice();
         }
 
-        if($product->getSize() !== null) {
+        if ($product->getSize() !== null) {
             $values['size'] = $product->getSize();
         }
 
-        if($product->getType() !== null) {
+        if ($product->getType() !== null) {
             $values['type'] = $product->getType();
         }
 
         $this->dbConnection->update(
-            'mvc.Products',
+            'Products',
             $values,
             [
                 'id' => $product->getId(),
@@ -119,11 +144,12 @@ class ProductRepository extends AbstractRepository
 
         foreach ($rows as $row) {
             $products[] = new Product(
-                $row['id'],
-                $row['name'],
-                $row['price'],
-                $row['size'],
-                $row['type']
+                (int)$row['id'],
+                (int)$row['sku'],
+                (string)$row['name'],
+                (float)$row['price'],
+                (int)$row['size'],
+                (string)$row['type']
             );
         }
 

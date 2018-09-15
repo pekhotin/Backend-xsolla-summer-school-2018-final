@@ -25,6 +25,7 @@ class StateRepository extends AbstractRepository
         if ($quantity === false) {
             return -1;
         }
+
         return (int)$quantity;
     }
     /**
@@ -103,56 +104,32 @@ class StateRepository extends AbstractRepository
 
     /**
      * @param Transaction[] $transactions
-     * @param int $warehouseId
-     */
-    public function addProducts($transactions, $warehouseId)
-    {
-        foreach ($transactions as $transaction) {
-            $productId = $transaction->getProductId();
-            $quantity = $transaction->getQuantity();
-            $todayQuantity = $this->getTodayQuantity($warehouseId, $productId);
-
-            if ($todayQuantity >= 0) {
-                $this->update($warehouseId, $productId, $quantity + $todayQuantity);
-            } else {
-                $lastQuantity = $this->getLastQuantity($warehouseId, $productId);
-                if ($lastQuantity > 0) {
-                    $this->insert($warehouseId, $productId, $lastQuantity + $quantity);
-                } else {
-                    $this->insert($warehouseId, $productId, $quantity);
-                }
-            }
-        }
-    }
-
-    /**
-     * @param Transaction[] $transactions
-     * @param int $warehouseId
      *
      * @throws \Doctrine\DBAL\ConnectionException
      */
-    public function removeProducts($transactions, $warehouseId)
+    public function addProducts($transactions)
     {
         $this->dbConnection->beginTransaction();
         try {
             foreach ($transactions as $transaction) {
-                $productId = $transaction->getProductId();
+                $warehouseId = (int)$transaction->getRecipient();
+                $productId = $transaction->getProduct()->getId();
                 $quantity = $transaction->getQuantity();
                 $todayQuantity = $this->getTodayQuantity($warehouseId, $productId);
 
-                if ($todayQuantity > 0) {
-                    $this->update($warehouseId, $productId, $todayQuantity - $quantity);
-
+                if ($todayQuantity >= 0) {
+                    $this->update($warehouseId, $productId, $quantity + $todayQuantity);
                 } else {
                     $lastQuantity = $this->getLastQuantity($warehouseId, $productId);
                     if ($lastQuantity > 0) {
-                        $this->insert($warehouseId, $productId, $lastQuantity - $quantity);
+                        $this->insert($warehouseId, $productId, $lastQuantity + $quantity);
+                    } else {
+                        $this->insert($warehouseId, $productId, $quantity);
                     }
                 }
-
-                if ($this->getLastQuantity($warehouseId, $productId) < 0) {
+                if ($this->getFreePlace($warehouseId) < 0) {
                     throw new \LogicException(
-                        'not enough product in warehouse!',
+                        "not enough space on warehouse with id {$warehouseId}!",
                         400
                     );
                 }
@@ -160,22 +137,48 @@ class StateRepository extends AbstractRepository
             $this->dbConnection->commit();
         } catch (\Exception $e) {
             $this->dbConnection->rollBack();
-            throw new $e;
+            throw $e;
         }
-
     }
 
     /**
-     * @param $warehouseId
-     * @param $productId
-     * @param $quantity
-     * @param $newWarehouseId
-     * @throws \Exception
+     * @param Transaction[] $transactions
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
      */
-    public function movementProducts($warehouseId, $productId, $quantity, $newWarehouseId)
+    public function removeProducts($transactions)
     {
-        $this->removeProducts($warehouseId, $productId, $quantity);
-        $this->addProducts($newWarehouseId, $productId, $quantity);
+        $this->dbConnection->beginTransaction();
+        try {
+            foreach ($transactions as $transaction) {
+                $warehouseId = (int)$transaction->getSender();
+                $productId = $transaction->getProduct()->getId();
+                $quantity = $transaction->getQuantity();
+                $todayQuantity = $this->getTodayQuantity($warehouseId, $productId);
+
+                if ($todayQuantity >= 0) {
+                    $this->update($warehouseId, $productId, $todayQuantity - $quantity);
+
+                } else {
+                    $lastQuantity = $this->getLastQuantity($warehouseId, $productId);
+                    if ($lastQuantity >= 0) {
+                        $this->insert($warehouseId, $productId, $lastQuantity - $quantity);
+                    }
+                }
+
+                if ($this->getLastQuantity($warehouseId, $productId) < 0) {
+                    throw new \LogicException(
+                        "not enough product with sku {$transaction->getProduct()->getSku()} in warehouse!",
+                        400
+                    );
+                }
+            }
+            $this->dbConnection->commit();
+        } catch (\Exception $e) {
+            $this->dbConnection->rollBack();
+            throw $e;
+        }
+
     }
     /**
      * @param int $warehouseId
@@ -200,24 +203,42 @@ class StateRepository extends AbstractRepository
         );
 
         $filling = 0;
+
         foreach ($rows as $row) {
             $filling += (int)$row['size'] * (int)$row['quantity'];
         }
 
         return $filling;
     }
+
+    public function getFreePlace($warehouseId)
+    {
+        $row = $this->dbConnection->fetchAssoc(
+            'SELECT capacity
+            FROM Warehouses
+            WHERE id = ?',
+            [$warehouseId]
+        );
+
+        if ($row === false) {
+            return null;
+        }
+        $freePlace = (int)$row['capacity'] - $this->getFilling($warehouseId);
+
+        return $freePlace;
+    }
     /**
-     * @param $warehouseId
+     * @param int $warehouseId
      *
      * @return array
      */
     public function getResiduesByWarehouse($warehouseId)
     {
         $rows = $this->dbConnection->fetchAll(
-            'SELECT p.name, s1.productId, s1.quantity, p.price
+            'SELECT p.name, p.sku, s1.quantity, p.price
             FROM State AS s1
             JOIN Products AS p ON p.id = s1.productId
-            WHERE warehouseId = ? AND date = (
+            WHERE warehouseId = ? AND s1.quantity > 0 AND date = (
               SELECT MAX(s2.date)
               FROM State AS s2
               WHERE s1.productId = s2.productId AND warehouseId = ? 
@@ -228,20 +249,19 @@ class StateRepository extends AbstractRepository
             ]
         );
 
-        $products = [];
+        $residues = [];
 
         foreach ($rows as $row) {
-            $products[] = [
-                'productId' => $row['productId'],
-                'name' => $row['name'],
-                'quantity' => $row['quantity'],
-                'cost' => $row['price'] * $row['quantity']
+            $residues[] = [
+                'sku' => (int)$row['sku'],
+                'quantity' => (int)$row['quantity'],
+                'cost' => (float)$row['price'] * (float)$row['quantity']
             ];
         }
-        return $products;
+        return $residues;
     }
     /**
-     * @param $productId
+     * @param int $productId
      *
      * @return array
      */
@@ -251,7 +271,7 @@ class StateRepository extends AbstractRepository
             'SELECT s1.warehouseId, s1.quantity, p.price
             FROM State AS s1
             JOIN Products AS p ON p.id = s1.productId
-            WHERE s1.productId = ? AND date = (
+            WHERE s1.productId = ? AND s1.quantity > 0 AND date = (
               SELECT MAX(s2.date)
               FROM State AS s2
               WHERE s1.productId = s2.productId 
@@ -259,30 +279,30 @@ class StateRepository extends AbstractRepository
             [$productId]
         );
 
-        $products = [];
+        $residues = [];
 
         foreach ($rows as $row) {
-            $products[] = [
-                'warehouseId' => $row['warehouseId'],
-                'quantity' => $row['quantity'],
-                'cost' => $row['price'] * $row['quantity']
+            $residues[] = [
+                'warehouseId' => (int)$row['warehouseId'],
+                'quantity' => (int)$row['quantity'],
+                'cost' => (float)$row['price'] * (float)$row['quantity']
             ];
         }
-        return $products;
+        return $residues;
     }
     /**
-     * @param $warehouseId
-     * @param $date
+     * @param int $warehouseId
+     * @param string $date
      *
      * @return array
      */
     public function getResiduesByWarehouseForDate($warehouseId, $date)
     {
         $rows = $this->dbConnection->fetchAll(
-            'SELECT p.name, s1.productId, s1.quantity, p.price
+            'SELECT p.name, p.sku, s1.quantity, p.price
             FROM State AS s1
             JOIN Products AS p ON p.id = s1.productId
-            WHERE warehouseId = ? AND date = (
+            WHERE warehouseId = ? AND s1.quantity > 0 AND date = (
               SELECT MAX(s2.date)
               FROM State AS s2
               WHERE s1.productId = s2.productId AND s2.warehouseId = ? AND s2.date <= ?
@@ -294,21 +314,20 @@ class StateRepository extends AbstractRepository
             ]
         );
 
-        $products = [];
+        $residues = [];
 
         foreach ($rows as $row) {
-            $products[] = [
-                'productId' => $row['productId'],
-                'name' => $row['name'],
-                'quantity' => $row['quantity'],
-                'cost' => $row['price'] * $row['quantity']
+            $residues[] = [
+                'sku' => (int)$row['sku'],
+                'quantity' => (int)$row['quantity'],
+                'cost' => (float)$row['price'] * (float)$row['quantity']
             ];
         }
-        return $products;
+        return $residues;
     }
     /**
-     * @param $productId
-     * @param $date
+     * @param int $productId
+     * @param string $date
      *
      * @return array
      */
@@ -318,7 +337,7 @@ class StateRepository extends AbstractRepository
             'SELECT s1.warehouseId, s1.quantity, p.price
             FROM State AS s1
             JOIN Products AS p ON p.id = s1.productId
-            WHERE s1.productId = ? AND date = (
+            WHERE s1.productId = ? AND s1.quantity > 0 AND date = (
               SELECT MAX(s2.date)
               FROM State AS s2
               WHERE s1.productId = s2.productId AND s2.date <= ?
@@ -329,16 +348,16 @@ class StateRepository extends AbstractRepository
             ]
         );
 
-        $products = [];
+        $residues = [];
 
         foreach ($rows as $row) {
-            $products[] = [
-                'warehouseId' => $row['warehouseId'],
-                'quantity' => $row['quantity'],
-                'cost' => $row['price'] * $row['quantity']
+            $residues[] = [
+                'warehouseId' => (int)$row['warehouseId'],
+                'quantity' => (int)$row['quantity'],
+                'cost' => (float)$row['price'] * (float)$row['quantity']
             ];
         }
-        return $products;
+        return $residues;
 
     }
 }

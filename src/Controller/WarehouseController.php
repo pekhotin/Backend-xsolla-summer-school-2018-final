@@ -222,6 +222,8 @@ class WarehouseController extends BaseController
      * @param $args
      *
      * @return Response
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
      */
     public function receiptProducts(Request $request, Response $response, $args)
     {
@@ -231,7 +233,6 @@ class WarehouseController extends BaseController
         $transactions = [];
         $warehouseId = $this->validateVar(trim($args['id']), 'int', 'warehouseId');
         $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
-        $batchSize= 0;
 
         if ($warehouse === null) {
             throw new \LogicException(
@@ -246,11 +247,20 @@ class WarehouseController extends BaseController
                 __DIR__ . '/../../resources/jsonSchema/receiptProducts.json'
             );
 
-            $productId = $this->validateVar(trim($param['productId']), 'int', 'productId');
+            $sku = $this->validateVar(trim($param['sku']), 'int', 'sku');
             $quantity = $this->validateVar(trim($param['quantity']), 'int', 'quantity');
+            $product = $this->productService->getOneBySku($sku, $this->user);
+
+            if ($product === null) {
+                throw new \LogicException(
+                    "product with sku {$sku} not found!",
+                    400
+                );
+            }
+
             $transactions[] = new Transaction(
                 null,
-                $productId,
+                $product,
                 $quantity,
                 $direction,
                 (string)date('Y-m-d H:i:s'),
@@ -258,27 +268,9 @@ class WarehouseController extends BaseController
                 $warehouseId
 
             );
-
-            $product = $this->productService->getOne($productId, $this->user);
-            if ($product === null) {
-                throw new \LogicException(
-                    "product with id {$productId} not found!",
-                    400
-                );
-            }
-
-            $batchSize += $quantity * $product->getSize();
         }
 
-        $filling = $this->stateService->getFilling($warehouseId);
-        if (($warehouse->getCapacity() - $filling) < $batchSize) {
-            throw new \LogicException(
-                'not enough space on warehouse!',
-                400
-            );
-        }
-
-        $this->stateService->addProducts($transactions, $warehouseId);
+        $this->stateService->addProducts($transactions);
         $this->transactionService->add($transactions);
 
         $transactionsArray = [];
@@ -292,9 +284,11 @@ class WarehouseController extends BaseController
     /**
      * @param Request $request
      * @param Response $response
-     * @param array $args
+     * @param $args
      *
      * @return Response
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
      */
     public function dispatchProducts(Request $request, Response $response, $args)
     {
@@ -319,11 +313,28 @@ class WarehouseController extends BaseController
                 __DIR__ . '/../../resources/jsonSchema/dispatchProducts.json'
             );
 
-            $productId = $this->validateVar(trim($param['productId']), 'int', 'productId');
+            $sku = $this->validateVar(trim($param['sku']), 'int', 'sku');
             $quantity = $this->validateVar(trim($param['quantity']), 'int', 'quantity');
+            $product = $this->productService->getOneBySku($sku, $this->user);
+
+            if ($product === null) {
+                throw new \LogicException(
+                    "product with sku {$sku} not found!",
+                    400
+                );
+            }
+
+            $thisQuantity = $this->stateService->quantityProductInWarehouse($warehouseId, $product->getId());
+            if ($thisQuantity < $quantity) {
+                throw new \LogicException(
+                    "not enough product with sku {$sku} in warehouse!",
+                    400
+                );
+            }
+
             $transactions[] = new Transaction(
                 null,
-                $productId,
+                $product,
                 $quantity,
                 $direction,
                 (string)date('Y-m-d H:i:s'),
@@ -331,25 +342,9 @@ class WarehouseController extends BaseController
                 $this->validateVar(trim($param['recipient']), 'string', 'recipient')
 
             );
-
-            $product = $this->productService->getOne($productId, $this->user);
-            if ($product === null) {
-                throw new \LogicException(
-                    "product with id {$productId} not found!",
-                    400
-                );
-            }
-
-            $thisQuantity = $this->stateService->quantityProductInWarehouse($warehouseId, $productId);
-            if ($thisQuantity < $quantity) {
-                throw new \LogicException(
-                    'not enough product in warehouse!',
-                    400
-                );
-            }
         }
 
-        $this->stateService->removeProducts($transactions, $warehouseId);
+        $this->stateService->removeProducts($transactions);
         $this->transactionService->add($transactions);
 
         $transactionsArray = [];
@@ -365,77 +360,70 @@ class WarehouseController extends BaseController
      * @param $args
      *
      * @return Response
+     *
+     * @throws \Exception
      */
     public function movementProducts(Request $request, Response $response, $args)
     {
-        //отправление нескольких товаров
         $this->initUser($request);
         $direction = 'betweenWarehouses';
         $bodyParams = $request->getParsedBody();
+        $transactions = [];
+        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'warehouseId');
+        $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
 
-        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'id');
-        $productId = $this->validateVar(trim($bodyParams['productId']), 'int', 'productId');
-        $quantity = $this->validateVar(trim($bodyParams['quantity']), 'int', 'quantity');
-        $newWarehouseId = $this->validateVar(trim($bodyParams['warehouseId']), 'int', 'warehouseId');
-
-        $product = $this->productService->getOne($productId, $this->user);
-        $newWarehouse = $this->warehouseService->getOne($newWarehouseId, $this->user);
-
-        if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+        if ($warehouse === null) {
             throw new \LogicException(
-                "movementProducts() warehouse with id {$warehouseId} not found!",
+                "warehouse with id {$warehouseId} not found!",
                 404
             );
         }
-        if ($product === null) {
-            throw new \LogicException(
-                "product with id {$warehouseId} not found!",
-                400
+
+        foreach ($bodyParams as $param) {
+            $this->jsonSchemaValidator->checkBySchema(
+                $param,
+                __DIR__ . '/../../resources/jsonSchema/movementProducts.json'
             );
-        }
-        if ($newWarehouse === null) {
-            throw new \LogicException(
-                "warehouse with id {$newWarehouseId} not found!",
-                400
-            );
-        }
-        $thisQuantity = $this->stateService->quantityProductInWarehouse($warehouseId, $productId);
-        $filling = $this->stateService->getFilling($newWarehouseId);
-        if ($thisQuantity < $quantity) {
-            throw new \LogicException(
-                "not enough product on warehouse with id {$warehouseId}!",
-                400
-            );
-        }
-        if (($newWarehouse->getCapacity() - $filling) < ($quantity * $product->getSize())) {
-            throw new \LogicException(
-                "not enough space on warehouse with id {$newWarehouseId}!",
-                400
+
+            $sku = $this->validateVar(trim($param['sku']), 'int', 'sku');
+            $quantity = $this->validateVar(trim($param['quantity']), 'int', 'quantity');
+            $newWarehouseId = $this->validateVar(trim($param['warehouseId']), 'int', 'warehouseId');
+            $newWarehouse = $this->warehouseService->getOne($newWarehouseId, $this->user);
+
+            $product = $this->productService->getOneBySku($sku, $this->user);
+            if ($product === null) {
+                throw new \LogicException(
+                    "product with sku {$sku} not found!",
+                    400
+                );
+            }
+            if ($newWarehouse === null) {
+                throw new \LogicException(
+                    "warehouse with id {$newWarehouseId} not found!",
+                    400
+                );
+            }
+
+            $transactions[] = new Transaction(
+                null,
+                $product,
+                $quantity,
+                $direction,
+                (string)date('Y-m-d H:i:s'),
+                $warehouseId,
+                $newWarehouseId
             );
         }
 
-        $transaction = new Transaction(
-            null,
-            $productId,
-            $quantity,
-            $direction,
-            (string)date('Y-m-d H:i:s'),
-            $warehouseId,
-            $newWarehouseId
-        );
+        $this->stateService->movementProducts($transactions);
+        $this->transactionService->add($transactions);
 
-        $this->transactionService->add($transaction);
-        $this->stateService->movementProducts($warehouseId, $productId, $quantity, $newWarehouseId);
+        $transactionsArray = [];
+        foreach ($transactions as $transaction) {
+            $transactionsArray[] = $transaction->getTransactionInfo();
+        }
 
-        return $response->withJson([
-                'transactionId' => $transaction->getId(),
-                'productId' => $productId,
-                'quantity' => $transaction->getQuantity(),
-                'cost' => $product->getPrice()*$transaction->getQuantity(),
-                'datetime' => $transaction->getDatetime(),
-                'from' => $transaction->getSender(),
-                'to' => $transaction->getRecipient()
-            ], 201);
+        return $response->withJson($transactionsArray, 201);
     }
     /**
      * @param Request $request
@@ -456,9 +444,9 @@ class WarehouseController extends BaseController
             );
         }
 
-        $products = $this->stateService->getResiduesByWarehouse($warehouseId);
+        $residues = $this->stateService->getResiduesByWarehouse($warehouseId);
 
-        return $response->withJson($products, 200);
+        return $response->withJson($residues, 200);
     }
     /**
      * @param Request $request
@@ -480,9 +468,9 @@ class WarehouseController extends BaseController
             );
         }
 
-        $products = $this->stateService->getResiduesByWarehouseForDate($warehouseId, $date);
+        $residues = $this->stateService->getResiduesByWarehouseForDate($warehouseId, $date);
 
-        return $response->withJson($products, 200);
+        return $response->withJson($residues, 200);
     }
     /**
      * @param Request $request

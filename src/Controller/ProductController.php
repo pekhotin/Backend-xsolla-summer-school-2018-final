@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Service\StateService;
 use App\Service\TransactionService;
 use App\Service\UserService;
-use JsonSchema\Validator;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -59,18 +58,19 @@ class ProductController extends BaseController
         $this->initUser($request);
         $bodyParams = $request->getParsedBody();
         $this->jsonSchemaValidator->checkBySchema($bodyParams, __DIR__ . '/../../resources/jsonSchema/product.json');
+        $sku = $this->validateVar(trim($bodyParams['sku']), 'int', 'sku');
 
-        $name = $this->validateVar(trim($bodyParams['name']), 'string', 'name');
-        $price = $this->validateVar(trim($bodyParams['price']), 'float', 'price');
-        $size = $this->validateVar(trim($bodyParams['size']), 'int', 'size');
-        $type = $this->validateVar(trim($bodyParams['type']), 'string', 'type');
+        if ($this->productService->getOneBySku($sku, $this->user) !== null) {
+            throw new \LogicException("product with sku {$sku} already exists!", 400);
+        }
 
         $product = new Product(
             null,
-            $name,
-            $price,
-            $size,
-            $type
+            $sku,
+            $this->validateVar(trim($bodyParams['name']), 'string', 'name'),
+            $this->validateVar(trim($bodyParams['price']), 'float', 'price'),
+            $this->validateVar(trim($bodyParams['size']), 'int', 'size'),
+            $this->validateVar(trim($bodyParams['type']), 'string', 'type')
         );
 
         $this->productService->add($product, $this->user);
@@ -89,13 +89,22 @@ class ProductController extends BaseController
         $this->initUser($request);
         $bodyParams = $request->getParsedBody();
 
-        $id = $this->validateVar(trim($args['id']), 'int', 'id');
-        if ($this->productService->getOne($id, $this->user) === null) {
-            throw new \LogicException("product with id {$id} not found!", 404);
+        $sku = $this->validateVar(trim($args['sku']), 'int', 'sku');
+        $product = $this->productService->getOneBySku($sku, $this->user);
+
+        if ($product === null) {
+            throw new \LogicException("product with sku {$sku} not found!", 404);
+        }
+
+        $newSku = null;
+        if (isset($bodyParams['sku'])) {
+            $newSku = $this->validateVar(trim($bodyParams['sku']), 'int', 'sku');
+            if ($this->productService->getOneBySku($newSku, $this->user) !== null) {
+                throw new \LogicException("product with sku {$newSku} already exists!", 400);
+            }
         }
 
         $name = null;
-        //проверяем имя на уникальность
         if (isset($bodyParams['name'])) {
             $name = $this->validateVar(trim($bodyParams['name']), 'string)', 'name');
         }
@@ -106,11 +115,10 @@ class ProductController extends BaseController
         }
 
         $size = null;
-        //если продукт участвовал в перемещениях, мы не можеим изменить его размер
         if (isset($bodyParams['size'])) {
             $size = $this->validateVar(trim($bodyParams['size']), 'int', 'size');
-            if ($this->transactionService->getMovementsByProduct($id) !== null) {
-                throw new \LogicException("product with id {$id} already participated in the movements", 400);
+            if ($this->transactionService->getMovementsByProduct($product->getId()) !== null) {
+                throw new \LogicException("product with id {$product->getId()} already participated in the movements", 400);
             }
         }
 
@@ -119,12 +127,13 @@ class ProductController extends BaseController
             $type = $this->validateVar(trim($bodyParams['type']), 'string', 'type');
         }
 
-        if ($name === null && $price === null && $size === null  && $type === null ) {
+        if ($name === null && $price === null && $size === null  && $type === null && $sku === null) {
             throw new \LogicException('updates parameters are not found!', 400);
         }
 
         $product = new Product(
-            $id,
+            $product->getId(),
+            $newSku,
             $name,
             $price,
             $size,
@@ -147,17 +156,24 @@ class ProductController extends BaseController
     public function deleteProduct(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $id = $this->validateVar(trim($args['id']), 'int', 'id');
+        $sku = $this->validateVar(trim($args['sku']), 'int', 'sku');
+        $product = $this->productService->getOneBySku($sku, $this->user);
 
-        if ($this->productService->getOne($id, $this->user) === null) {
-            throw new \LogicException("product with id {$id} not found!", 404);
+        if ($product === null) {
+            throw new \LogicException(
+                "product with sku {$sku} not found!",
+                404
+            );
         }
 
-        if ($this->transactionService->getMovementsByProduct($id) !== null) {
-            throw new \LogicException("product with id {$id} already participated in the movements", 400);
+        if ($this->transactionService->getMovementsByProduct($product->getId()) !== null) {
+            throw new \LogicException(
+                "product with sku {$sku} already participated in the movements",
+                400
+            );
         }
 
-        $this->productService->remove($id);
+        $this->productService->remove($product->getId());
 
         return $response->withStatus(204);
     }
@@ -172,10 +188,11 @@ class ProductController extends BaseController
     {
         $this->initUser($request);
 
-        $id = $this->validateVar(trim($args['id']), 'int', 'id');
-        $product = $this->productService->getOne($id, $this->user);
+        $sku = $this->validateVar(trim($args['sku']), 'int', 'sku');
+        $product = $this->productService->getOneBySku($sku, $this->user);
+
         if ($product === null) {
-            throw new \LogicException("product with id {$id} not found!", 404);
+            throw new \LogicException("product with sku {$sku} not found!", 404);
         }
 
         return $response->withJson($product->getProductArray(), 200);
@@ -198,7 +215,6 @@ class ProductController extends BaseController
 
         return $response->withJson($productsArray, 200);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -209,14 +225,15 @@ class ProductController extends BaseController
     public function getResidues(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $productId = $this->validateVar(trim($args['id']), 'int', 'id');
+        $sku = $this->validateVar(trim($args['sku']), 'int', 'sku');
 
-        if ($this->productService->getOne($productId, $this->user) === null) {
-            throw new \LogicException("product with id {$productId} not found!", 404);
+        $product = $this->productService->getOneBySku($sku, $this->user);
+        if ($product === null) {
+            throw new \LogicException("product with sku {$sku} not found!", 404);
         }
 
-        $products = $this->stateService->getResiduesByProduct($productId);
-        return $response->withJson($products, 200);
+        $residues = $this->stateService->getResiduesByProduct($product->getId());
+        return $response->withJson($residues, 200);
     }
     /**
      * @param Request $request
@@ -228,16 +245,16 @@ class ProductController extends BaseController
     public function getResiduesForDate(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $productId = $this->validateVar(trim($args['id']), 'int', 'id');
+        $sku= $this->validateVar(trim($args['sku']), 'int', 'sku');
         $date = $this->validateVar(trim($args['date']), 'date', 'date');
-
-        if ($this->productService->getOne($productId, $this->user) === null) {
-            throw new \LogicException("product with id {$productId} not found!", 404);
+        $product = $this->productService->getOneBySku($sku, $this->user);
+        if ($product === null) {
+            throw new \LogicException("product with sku {$sku} not found!", 404);
         }
 
-        $products = $this->stateService->getResiduesByProductForDate($productId, $date);
+        $residues = $this->stateService->getResiduesByProductForDate($product->getId(), $date);
 
-        return $response->withJson($products, 200);
+        return $response->withJson($residues, 200);
     }
     /**
      * @param Request $request
@@ -249,13 +266,13 @@ class ProductController extends BaseController
     public function getMovements(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $productId = $this->validateVar(trim($args['id']), 'int', 'id');
-
-        if ($this->productService->getOne($productId, $this->user) === null) {
-            throw new \LogicException("getResidues() product with id {$productId} ' not found!", 404);
+        $sku = $this->validateVar(trim($args['sku']), 'int', 'sku');
+        $product = $this->productService->getOneBySku($sku, $this->user);
+        if ($product === null) {
+            throw new \LogicException("product with sku {$sku} not found!", 404);
         }
 
-        $transactions = $this->transactionService->getMovementsByProduct($productId);
+        $transactions = $this->transactionService->getMovementsByProduct($product->getId());
         return $response->withJson($transactions);
     }
 }

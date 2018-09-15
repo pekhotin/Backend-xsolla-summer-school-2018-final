@@ -22,7 +22,6 @@ class ProductService
         
         $this->productRepository = $productRepository;
     }
-
     /**
      * @param User $user
      *
@@ -32,18 +31,26 @@ class ProductService
     {
         return $this->productRepository->getAll($user);
     }
-
     /**
-     * @param $id
+     * @param int $id
      * @param User $user
      *
      * @return Product|null
      */
-    public function getOne($id, User $user)
+    public function getOneById(int $id, User $user)
     {
         return $this->productRepository->findById($id, $user);
     }
-
+    /**
+     * @param int $sku
+     * @param User $user
+     *
+     * @return Product|null
+     */
+    public function getOneBySku(int $sku, User $user)
+    {
+        return $this->productRepository->findBySku($sku, $user);
+    }
     /**
      * @param Product $product
      * @param User $user
@@ -54,19 +61,20 @@ class ProductService
     }
 
     /**
-     * @param $productId
+     * @param int $productId
      *
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function remove($productId)
+    public function remove(int $productId)
     {
         return $this->productRepository->delete($productId);
     }
 
     /**
      * @param Product $product
+     * @param User $user
      *
-     * @return Product
+     * @return Product|null
      */
     public function update(Product $product, User $user)
     {

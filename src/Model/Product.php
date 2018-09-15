@@ -9,6 +9,10 @@ class Product
      */
     private $id;
     /**
+     * @var int
+     */
+    private $sku;
+    /**
      * @var string
      */
     private $name;
@@ -33,13 +37,21 @@ class Product
      * @param int $size
      * @param string $type
      */
-    public function __construct($id, $name, $price, $size, $type)
+    public function __construct($id, $sku, $name, $price, $size, $type)
     {
         $this->id = $id;
+        $this->sku = $sku;
         $this->name = $name;
         $this->price = $price;
         $this->size = $size;
         $this->type = $type;
+    }
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
     }
     /**
      * @param int $id
@@ -51,9 +63,16 @@ class Product
     /**
      * @return int
      */
-    public function getId()
+    public function getSku()
     {
-        return $this->id;
+        return $this->sku;
+    }
+    /**
+     * @param int $sku
+     */
+    public function setSku($sku)
+    {
+        $this->sku = $sku;
     }
     /**
      * @return string
@@ -117,11 +136,11 @@ class Product
     public function getProductArray()
     {
         return [
-            'id' => $this->getId(),
-            'name' => $this->getName(),
-            'price' => $this->getPrice(),
-            'size' => $this->getSize(),
-            'type' => $this->getType()
+            'sku' => $this->sku,
+            'name' => $this->name,
+            'price' => $this->price,
+            'size' => $this->size,
+            'type' => $this->type
         ];
     }
 }

@@ -92,8 +92,8 @@ class UserController extends BaseController
         $values['login'] = isset($bodyParams['login'])
             ? $this->validateVar($bodyParams['login'], 'string', 'login')
             : $this->user->getLogin();
-        $values['organization'] = isset($bodyParams['organisation'])
-            ? $this->validateVar($bodyParams['organisation'], 'string', 'organisation')
+        $values['organization'] = isset($bodyParams['organization'])
+            ? $this->validateVar($bodyParams['organization'], 'string', 'organization')
             : $this->user->getOrganization();
         $values['email'] = isset($bodyParams['email'])
             ? $this->validateVar($bodyParams['email'], 'email', 'email')

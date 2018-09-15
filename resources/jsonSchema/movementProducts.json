@@ -5,24 +5,16 @@
     "sku": {
       "type": "integer"
     },
-    "name": {
-      "type": "string"
-    },
-    "price": {
-      "type": "number"
-    },
-    "size": {
+    "quantity": {
       "type": "integer"
     },
-    "type": {
-      "type": "string"
+    "warehouseId": {
+      "type": "integer"
     }
   },
   "required": [
     "sku",
-    "name",
-    "price",
-    "size",
-    "type"
+    "quantity",
+    "warehouseId"
   ]
 }

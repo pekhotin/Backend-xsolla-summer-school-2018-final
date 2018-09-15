@@ -29,14 +29,14 @@ class UserRepository extends AbstractRepository
         }
 
         return new User(
-            $row['id'],
-            $row['login'],
-            $row['name'],
-            $row['surname'],
-            $row['hash'],
-            $row['organization'],
-            $row['email'],
-            $row['phoneNumber']
+            (int)$row['id'],
+            (string)$row['login'],
+            (string)$row['name'],
+            (string)$row['surname'],
+            (string)$row['hash'],
+            (string)$row['organization'],
+            (string)$row['email'],
+            (string)$row['phoneNumber']
         );
     }
 
@@ -50,10 +50,7 @@ class UserRepository extends AbstractRepository
     {
         $row = $this->dbConnection->fetchAssoc(
             'SELECT * FROM Users WHERE email = ? AND id != ?',
-            [
-                $email,
-                $userId
-            ]
+            [$email,$userId]
         );
 
         if ($row === false) {
@@ -61,14 +58,14 @@ class UserRepository extends AbstractRepository
         }
 
         return new User(
-            $row['id'],
-            $row['login'],
-            $row['name'],
-            $row['surname'],
-            $row['hash'],
-            $row['organization'],
-            $row['email'],
-            $row['phoneNumber']
+            (int)$row['id'],
+            (string)$row['login'],
+            (string)$row['name'],
+            (string)$row['surname'],
+            (string)$row['hash'],
+            (string)$row['organization'],
+            (string)$row['email'],
+            (string)$row['phoneNumber']
         );
     }
 
@@ -96,14 +93,14 @@ class UserRepository extends AbstractRepository
         }
 
         return new User(
-            $row['id'],
-            $row['login'],
-            $row['name'],
-            $row['surname'],
-            $row['hash'],
-            $row['organization'],
-            $row['email'],
-            $row['phoneNumber']
+            (int)$row['id'],
+            (string)$row['login'],
+            (string)$row['name'],
+            (string)$row['surname'],
+            (string)$row['hash'],
+            (string)$row['organization'],
+            (string)$row['email'],
+            (string)$row['phoneNumber']
         );
     }
 
@@ -158,9 +155,7 @@ class UserRepository extends AbstractRepository
     {
         $this->dbConnection->delete(
             'Users',
-            [
-                'id' => $user->getId()
-            ]
+            ['id' => $user->getId()]
         );
     }
     /**
@@ -180,14 +175,14 @@ class UserRepository extends AbstractRepository
         }
 
         return new User(
-            $row['id'],
-            $row['login'],
-            $row['name'],
-            $row['surname'],
-            $row['hash'],
-            $row['organization'],
-            $row['email'],
-            $row['phoneNumber']
+            (int)$row['id'],
+            (string)$row['login'],
+            (string)$row['name'],
+            (string)$row['surname'],
+            (string)$row['hash'],
+            (string)$row['organization'],
+            (string)$row['email'],
+            (string)$row['phoneNumber']
         );
     }
 }

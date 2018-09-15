@@ -28,7 +28,7 @@ class TransactionRepository extends AbstractRepository
     public function findAllByWarehouse($warehouseId)
     {
         $rows = $this->dbConnection->fetchAll(
-            'SELECT t.id, t.productId, t.quantity, t.direction, t.datetime, t.sender, t.recipient, p.price, p.name 
+            'SELECT t.id, t.quantity, t.direction, t.datetime, t.sender, t.recipient, p.price, p.name, p.sku 
                 FROM Transactions AS t
                 JOIN Products AS p ON t.productId = p.id
                 WHERE t.sender = ? OR t.recipient = ?
@@ -39,20 +39,22 @@ class TransactionRepository extends AbstractRepository
             ]
         );
 
-        if ($rows === false) return null;
+        if (count($rows) === 0) {
+            return null;
+        }
 
         $transactionsArray = [];
 
         foreach ($rows as $row) {
             $transactionsArray[] = [
-                'transactionId' => $row['id'],
-                'productId' => $row['productId'],
-                'quantity' => $row['quantity'],
-                'cost' => $row['quantity'] * $row['price'],
-                'direction' => $row['direction'],
-                'datetime' => $row['datetime'],
-                'sender' => $row['sender'],
-                'recipient' => $row['recipient'],
+                'transactionId' => (int)$row['id'],
+                'sku' => (int)$row['sku'],
+                'quantity' => (int)$row['quantity'],
+                'cost' => (float)$row['quantity'] * (float)$row['price'],
+                'direction' => (string)$row['direction'],
+                'datetime' => (string)$row['datetime'],
+                'sender' => (string)$row['sender'],
+                'recipient' => (string)$row['recipient'],
             ];
         }
         return $transactionsArray;
@@ -65,7 +67,7 @@ class TransactionRepository extends AbstractRepository
     public function getAllByProduct($productId)
     {
         $rows = $this->dbConnection->fetchAll(
-            'SELECT t.id, t.productId, t.quantity, t.direction, t.datetime, t.sender, t.recipient, p.price, p.name 
+            'SELECT t.id, t.quantity, t.direction, t.datetime, t.sender, t.recipient, p.price, p.name, p.sku
                 FROM Transactions AS t
                 JOIN Products AS p ON t.productId = p.id
                 WHERE t.productId = ?
@@ -73,20 +75,22 @@ class TransactionRepository extends AbstractRepository
             [$productId]
         );
 
-        if ($rows === false) return null;
+        if (count($rows) === 0) {
+            return null;
+        }
 
         $transactionsArray = [];
 
         foreach ($rows as $row) {
             $transactionsArray[] = [
-                'transactionId' => $row['id'],
-                'productId' => $row['productId'],
-                'quantity' => $row['quantity'],
-                'cost' => $row['quantity'] * $row['price'],
-                'direction' => $row['direction'],
-                'datetime' => $row['datetime'],
-                'sender' => $row['sender'],
-                'recipient' => $row['recipient']
+                'transactionId' => (int)$row['id'],
+                'sku' => (int)$row['sku'],
+                'quantity' => (int)$row['quantity'],
+                'cost' => (float)$row['quantity'] * (float)$row['price'],
+                'direction' => (string)$row['direction'],
+                'datetime' => (string)$row['datetime'],
+                'sender' => (string)$row['sender'],
+                'recipient' => (string)$row['recipient']
             ];
         }
         return $transactionsArray;

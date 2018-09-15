@@ -21,36 +21,34 @@ class StateService
 
         $this->stateRepository = $stateRepository;
     }
-
     /**
      * @param Transaction[] $transactions
-     * @param int $warehouseId
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
      */
-    public function addProducts($transactions, $warehouseId)
+    public function addProducts($transactions)
     {
-        $this->stateRepository->addProducts($transactions, $warehouseId);
+        $this->stateRepository->addProducts($transactions);
     }
-
     /**
      * @param Transaction[] $transactions
-     * @param int $warehouseId
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
      */
-    public function removeProducts($transactions, $warehouseId)
+    public function removeProducts($transactions)
     {
-        $this->stateRepository->removeProducts($transactions, $warehouseId);
+        $this->stateRepository->removeProducts($transactions);
     }
-
     /**
-     * @param $warehouseId
-     * @param $productId
-     * @param $quantity
-     * @param $newWarehouseId
+     * @param Transaction[] $transactions
+     *
+     * @throws \Exception
      */
-    public function movementProducts($warehouseId, $productId, $quantity, $newWarehouseId)
+    public function movementProducts($transactions)
     {
-        $this->stateRepository->movementProducts($warehouseId, $productId, $quantity, $newWarehouseId);
+        $this->stateRepository->removeProducts($transactions);
+        $this->stateRepository->addProducts($transactions);
     }
-
     /**
      * @param int $warehouseId
      *
@@ -60,7 +58,6 @@ class StateService
     {
         return $this->stateRepository->getFilling($warehouseId);
     }
-
     /**
      * @param int $warehouseId
      * @param int $productId
@@ -71,9 +68,8 @@ class StateService
     {
         return $this->stateRepository->getLastQuantity($warehouseId, $productId);
     }
-
     /**
-     * @param $warehouseId
+     * @param int $warehouseId
      *
      * @return array
      */
@@ -81,17 +77,31 @@ class StateService
     {
         return $this->stateRepository->getResiduesByWarehouse($warehouseId);
     }
-
+    /**
+     * @param int $warehouseId
+     * @param string $date
+     *
+     * @return array
+     */
     public function getResiduesByWarehouseForDate($warehouseId, $date)
     {
         return $this->stateRepository->getResiduesByWarehouseForDate($warehouseId, $date);
     }
-
+    /**
+     * @param int $productId
+     *
+     * @return array
+     */
     public function getResiduesByProduct($productId)
     {
         return $this->stateRepository->getResiduesByProduct($productId);
     }
-
+    /**
+     * @param int $productId
+     * @param string $date
+     *
+     * @return array
+     */
     public function getResiduesByProductForDate($productId, $date)
     {
         return $this->stateRepository->getResiduesByProductForDate($productId, $date);

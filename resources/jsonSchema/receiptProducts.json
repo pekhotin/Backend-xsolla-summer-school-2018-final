@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "productId": {
+    "sku": {
       "type": "integer"
     },
     "quantity": {
@@ -13,7 +13,7 @@
     }
   },
   "required": [
-    "productId",
+    "sku",
     "quantity",
     "sender"
   ]

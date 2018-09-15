@@ -50,12 +50,12 @@ class WarehouseService
     }
 
     /**
-     * @param int $address
+     * @param string $address
      * @param User $user
      *
      * @return Warehouse|null
      */
-    public function getOneByAddress($address, User $user)
+    public function getOneByAddress(string $address, User $user)
     {
         return $this->warehouseRepository->findByAddress($address, $user);
     }

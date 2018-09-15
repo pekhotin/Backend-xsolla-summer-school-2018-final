@@ -29,6 +29,7 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mvc`.`Products` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `sku` INT(11) NULL DEFAULT NULL,
   `name` VARCHAR(255) NOT NULL,
   `price` FLOAT NOT NULL,
   `size` INT(11) NOT NULL,
@@ -100,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `mvc`.`Transactions` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `productId` INT(11) NOT NULL,
   `quantity` INT(11) NOT NULL,
-  `direction` ENUM('receipt', 'dispatch', 'betweenWarehouses') NOT NULL,
+  `direction` VARCHAR(80) NOT NULL,
   `datetime` DATETIME NOT NULL,
   `sender` VARCHAR(255) NULL DEFAULT NULL,
   `recipient` VARCHAR(255) NULL DEFAULT NULL,
@@ -121,6 +122,6 @@ GRANT SELECT, INSERT, DELETE, UPDATE ON mvc.Users TO 'non-root'@'%';
 GRANT SELECT, INSERT, DELETE, UPDATE ON mvc.Products TO 'non-root'@'%';
 GRANT SELECT, INSERT, DELETE, UPDATE ON mvc.Warehouses TO 'non-root'@'%';
 GRANT SELECT, INSERT, DELETE ON mvc.Transactions TO 'non-root'@'%';
-GRANT SELECT, INSERT, DELETE ON mvc.State TO 'non-root'@'%';
+GRANT SELECT, INSERT, DELETE, UPDATE ON mvc.State TO 'non-root'@'%';
 
 FLUSH PRIVILEGES;
