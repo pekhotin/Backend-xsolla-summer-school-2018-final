@@ -13,7 +13,7 @@ class UserService
     private $userRepository;
 
     /**
-     * UserService constructor.
+     * UserServiceTest constructor.
      *
      * @param UserRepository $userRepository
      */
@@ -21,12 +21,15 @@ class UserService
     {
         $this->userRepository = $userRepository;
     }
+
     /**
      * @param User $user
+     *
+     * @return User
      */
     public function add(User $user)
     {
-        $this->userRepository->insert($user);
+        return $this->userRepository->insert($user);
     }
     /**
      * @param string $login

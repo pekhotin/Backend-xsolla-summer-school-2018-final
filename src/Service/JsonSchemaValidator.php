@@ -21,13 +21,17 @@ class JsonSchemaValidator
     {
         $this->validator = $validator;
     }
+
     /**
      * @param $data
      * @param string $schemaPath
+     *
+     * @return bool
      */
     public function checkBySchema($data, string $schemaPath)
     {
-        $json = json_encode($data);$dataJson = json_decode($json);
+        $json = json_encode($data);
+        $dataJson = json_decode($json);
         $this->validator->reset();
 
         $jsonSchema = $this->getJsonSchema($schemaPath);
@@ -36,6 +40,8 @@ class JsonSchemaValidator
         if (!$this->validator->isValid()) {
             throw new ValidationException($this->validator->getErrors()[0]['message'], 400);
         }
+
+        return true;
     }
 
     private function getJsonSchema($schemaPath)
