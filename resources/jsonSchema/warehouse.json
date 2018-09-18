@@ -3,10 +3,13 @@
   "type": "object",
   "properties": {
     "address": {
-      "type": "string"
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 200
     },
     "capacity": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 1
     }
   },
   "required": [

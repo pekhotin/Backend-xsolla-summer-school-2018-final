@@ -72,12 +72,11 @@ class ProductService
 
     /**
      * @param Product $product
-     * @param User $user
      *
      * @return Product|null
      */
-    public function update(Product $product, User $user)
+    public function update(Product $product)
     {
-        return $this->productRepository->update($product, $user);
+        return $this->productRepository->update($product);
     }
 }

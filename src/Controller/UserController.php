@@ -2,12 +2,20 @@
 
 namespace App\Controller;
 
+use App\Service\UserService;
+use App\Validator\UserValidator;
+use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use App\Model\User;
 
 class UserController extends BaseController
 {
+    public function __construct(App $app, UserService $userService)
+    {
+        parent::__construct($app, $userService);
+        $this->validator = new UserValidator();
+    }
 
     /**
      * @param Request $request
@@ -18,42 +26,34 @@ class UserController extends BaseController
     public function register(Request $request, Response $response)
     {
         $bodyParams = $request->getParsedBody();
-        $this->jsonSchemaValidator->checkBySchema($bodyParams, __DIR__ . '/../../resources/jsonSchema/user.json');
+        $values = $this->validator->validateInsertData($bodyParams);
 
-        $login = $this->validateVar(trim($bodyParams['login']), 'string', 'login');
-        $name = $this->validateVar(trim($bodyParams['name']), 'string', 'name');
-        $surname = $this->validateVar(trim($bodyParams['surname']), 'string', 'surname');
-        $organization = $this->validateVar(trim($bodyParams['organization']), 'string', 'organization');
-        $email = $this->validateVar(trim($bodyParams['email']), 'email', 'email');
-        $password = $this->validateVar(trim($bodyParams['password']), 'string', 'password');
-        $phoneNumber = $this->validateVar(trim($bodyParams['phoneNumber']), 'string', 'phoneNumber');
-
-        if ($this->userService->getOneByNameAndOrg($name, $surname, $organization) !== null) {
+        if ($this->userService->getOneByNameAndOrg($values['name'], $values['surname'], $values['organization']) !== null) {
             throw new \LogicException(
-                "user {$name} {$surname} is exist in organization {$organization}!",
+                "user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}!",
                 400
             );
         }
-        if ($this->userService->getOneByLogin($login) !== null) {
+        if ($this->userService->getOneByLogin($values['login']) !== null) {
             throw new \LogicException(
-                "user with login {$login} is exist!",
+                "user with login {$values['login']} is exist!",
                 400);
         }
-        if ($this->userService->getOneByEmail($email) !== null) {
+        if ($this->userService->getOneByEmail($values['email']) !== null) {
             throw new \LogicException(
-                "user with email {$email} is exist!",
+                "user with email {$values['email']} is exist!",
                 400);
         }
 
         $user = new User(
             null,
-            $login,
-            $name,
-            $surname,
-            password_hash($password, PASSWORD_DEFAULT),
-            $organization,
-            $email,
-            $phoneNumber
+            $values['login'],
+            $values['name'],
+            $values['surname'],
+            password_hash( $values['password'], PASSWORD_DEFAULT),
+            $values['organization'],
+            $values['email'],
+            $values['phoneNumber']
         );
 
         $this->userService->add($user);
@@ -81,36 +81,9 @@ class UserController extends BaseController
     {
         $this->initUser($request);
         $bodyParams = $request->getParsedBody();
-        $values = [];
+        $values = $this->validator->validateUpdateData($bodyParams, $this->user);
 
-        $values['name'] = isset($bodyParams['name'])
-            ? $this->validateVar($bodyParams['name'], 'string', 'name')
-            : $this->user->getName();
-        $values['surname'] = isset($bodyParams['surname'])
-            ? $this->validateVar($bodyParams['surname'], 'string', 'surname')
-            : $this->user->getSurname();
-        $values['login'] = isset($bodyParams['login'])
-            ? $this->validateVar($bodyParams['login'], 'string', 'login')
-            : $this->user->getLogin();
-        $values['organization'] = isset($bodyParams['organization'])
-            ? $this->validateVar($bodyParams['organization'], 'string', 'organization')
-            : $this->user->getOrganization();
-        $values['email'] = isset($bodyParams['email'])
-            ? $this->validateVar($bodyParams['email'], 'email', 'email')
-            : $this->user->getEmail();
-        $values['hash'] = isset($bodyParams['password'])
-            ? password_hash($this->validateVar($bodyParams['password'], 'string', 'password'), PASSWORD_DEFAULT)
-            : $this->user->getPasswordHash();
-        $values['phoneNumber'] = isset($bodyParams['phoneNumber'])
-            ? $this->validateVar($bodyParams['phoneNumber'], 'string', 'phoneNumber')
-            : $this->user->getPhoneNumber();
-
-        if ($this->userService->getOneByNameAndOrg(
-            $values['name'],
-            $values['surname'],
-            $values['organization'],
-            $this->user->getId()) !== null
-        ) {
+        if ($this->userService->getOneByNameAndOrg($values['name'], $values['surname'], $values['organization'], $this->user->getId()) !== null) {
             throw new \LogicException(
                 "user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}!",
                 400
@@ -128,16 +101,17 @@ class UserController extends BaseController
                 400);
         }
 
-        // добавить проверку для номера телефона
-
         $this->user = $this->userService->update($this->user, $values);
+
         return $response->withJson($this->user->getUserArray(), 200);
     }
+
     /**
      * @param Request $request
      * @param Response $response
-     *
      * @return Response
+     *
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
     public function deleteMe(Request $request, Response $response)
     {

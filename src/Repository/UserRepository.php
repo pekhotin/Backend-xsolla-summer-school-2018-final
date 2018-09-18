@@ -126,7 +126,7 @@ class UserRepository extends AbstractRepository
             $values
         );
 
-        $user->setId($this->dbConnection->lastInsertId());
+        $user->setId((int)$this->dbConnection->lastInsertId());
         return $user;
     }
     /**

@@ -8,6 +8,7 @@ use App\Service\UserService;
 use App\Service\WarehouseService;
 use App\Service\StateService;
 use App\Service\ProductService;
+use App\Validator\WarehouseValidator;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -54,6 +55,7 @@ class WarehouseController extends BaseController
         $this->stateService = $stateService;
         $this->productService = $productService;
         $this->transactionService = $transactionService;
+        $this->validator = new WarehouseValidator();
     }
     /**
      * @param Request $request
@@ -65,23 +67,20 @@ class WarehouseController extends BaseController
     {
         $this->initUser($request);
         $bodyParams = $request->getParsedBody();
-        $this->jsonSchemaValidator->checkBySchema($bodyParams, __DIR__ . '/../../resources/jsonSchema/warehouse.json');
+        $values = $this->validator->validateInsertData($bodyParams);
 
-        $address = $this->validateVar(trim($bodyParams['address']), 'string', 'address');
-        $capacity = $this->validateVar(trim($bodyParams['capacity']), 'int', 'capacity');
-
-        $warehouse = new Warehouse(
-            null,
-            $address,
-            $capacity
-        );
-
-        if ($this->warehouseService->getOneByAddress($address, $this->user) !== null) {
+        if ($this->warehouseService->getOneByAddress($values['address'], $this->user) !== null) {
             throw new \LogicException(
-                "warehouse with address {$address} already exists!",
+                "warehouse with address {$values['address']} already exists!",
                 400
             );
         }
+
+        $warehouse = new Warehouse(
+            null,
+            $values['address'],
+            $values['capacity']
+        );
 
         $this->warehouseService->add($warehouse, $this->user);
 
@@ -98,45 +97,37 @@ class WarehouseController extends BaseController
     {
         $this->initUser($request);
         $bodyParams = $request->getParsedBody();
-        $id = $this->validateVar(trim($args['id']), 'int', 'id');
-        $address = null;
-        $capacity = null;
+        $id = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
-        if ($this->warehouseService->getOne($id, $this->user) === null) {
+        $warehouse = $this->warehouseService->getOne($id, $this->user);
+
+        if ($warehouse === null) {
             throw new \LogicException(
                 "warehouse with id {$id} not found!",
                 404
             );
         }
-        if (isset($bodyParams['address'])) {
-            $address = $this->validateVar(trim($bodyParams['address']), 'string', 'address');
-            if ($this->warehouseService->getOneByAddress($address, $this->user) !== null) {
-                throw new \LogicException(
-                    "warehouse with address {$address} already exists!",
-                    400
-                );
-            }
-        }
-        if (isset($bodyParams['capacity'])) {
-            $capacity = $this->validateVar(trim($bodyParams['capacity']), 'int', 'capacity');
-            if ($this->stateService->getFilling($id) > $capacity) {
-                throw new \LogicException(
-                    'new capacity can not be less than filling!',
-                    400
-                );
-            }
-        }
-        if ($address === null && $capacity === null) {
+
+        $values = $this->validator->validateUpdateData($warehouse, $bodyParams);
+
+        if ($this->warehouseService->getOneByAddress($values['address'], $this->user) !== null) {
             throw new \LogicException(
-                'updates parameters are not found!',
+                "warehouse with address {$values['address']} already exists!",
+                400
+            );
+        }
+
+        if ($this->stateService->getFilling($id) > $values['capacity']) {
+            throw new \LogicException(
+                'new capacity can not be less than filling!',
                 400
             );
         }
 
         $warehouse = new Warehouse(
             $id,
-            $address,
-            $capacity
+            $values['address'],
+            $values['capacity']
         );
 
         $warehouse = $this->warehouseService->update($warehouse, $this->user);
@@ -155,7 +146,7 @@ class WarehouseController extends BaseController
     public function deleteWarehouse(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $id = $this->validateVar(trim($args['id']), 'int', 'id');
+        $id = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
         if ($this->warehouseService->getOne($id, $this->user) === null) {
             throw new \LogicException(
@@ -186,7 +177,7 @@ class WarehouseController extends BaseController
     public function getWarehouse(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $id = $this->validateVar(trim($args['id']), 'int', 'id');
+        $id = $this->validator->validateVar(trim($args['id']), 'int', 'id');
         $warehouse = $this->warehouseService->getOne($id, $this->user);
 
         if($warehouse === null) {
@@ -231,7 +222,8 @@ class WarehouseController extends BaseController
         $direction = 'receipt';
         $bodyParams = $request->getParsedBody();
         $transactions = [];
-        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'warehouseId');
+        $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'warehouseId');
+
         $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
 
         if ($warehouse === null) {
@@ -242,18 +234,13 @@ class WarehouseController extends BaseController
         }
 
         foreach ($bodyParams as $param) {
-            $this->jsonSchemaValidator->checkBySchema(
-                $param,
-                __DIR__ . '/../../resources/jsonSchema/receiptProducts.json'
-            );
 
-            $sku = $this->validateVar(trim($param['sku']), 'int', 'sku');
-            $quantity = $this->validateVar(trim($param['quantity']), 'int', 'quantity');
-            $product = $this->productService->getOneBySku($sku, $this->user);
+            $values = $this->validator->receiptProductsData($param);
+            $product = $this->productService->getOneBySku($values['sku'], $this->user);
 
             if ($product === null) {
                 throw new \LogicException(
-                    "product with sku {$sku} not found!",
+                    "product with sku {$values['sku']} not found!",
                     400
                 );
             }
@@ -261,10 +248,10 @@ class WarehouseController extends BaseController
             $transactions[] = new Transaction(
                 null,
                 $product,
-                $quantity,
+                $values['quantity'],
                 $direction,
                 (string)date('Y-m-d H:i:s'),
-                $this->validateVar(trim($param['sender']), 'string', 'sender'),
+                $values['sender'],
                 $warehouseId
 
             );
@@ -297,7 +284,7 @@ class WarehouseController extends BaseController
 
         $bodyParams = $request->getParsedBody();
         $transactions = [];
-        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'warehouseId');
+        $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'warehouseId');
         $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
 
         if ($warehouse === null) {
@@ -308,26 +295,13 @@ class WarehouseController extends BaseController
         }
 
         foreach ($bodyParams as $param) {
-            $this->jsonSchemaValidator->checkBySchema(
-                $param,
-                __DIR__ . '/../../resources/jsonSchema/dispatchProducts.json'
-            );
 
-            $sku = $this->validateVar(trim($param['sku']), 'int', 'sku');
-            $quantity = $this->validateVar(trim($param['quantity']), 'int', 'quantity');
-            $product = $this->productService->getOneBySku($sku, $this->user);
+            $values = $this->validator->dispatchProductsData($param);
+            $product = $this->productService->getOneBySku($values['sku'], $this->user);
 
             if ($product === null) {
                 throw new \LogicException(
-                    "product with sku {$sku} not found!",
-                    400
-                );
-            }
-
-            $thisQuantity = $this->stateService->quantityProductInWarehouse($warehouseId, $product->getId());
-            if ($thisQuantity < $quantity) {
-                throw new \LogicException(
-                    "not enough product with sku {$sku} in warehouse!",
+                    "product with sku {$values['sku']} not found!",
                     400
                 );
             }
@@ -335,11 +309,11 @@ class WarehouseController extends BaseController
             $transactions[] = new Transaction(
                 null,
                 $product,
-                $quantity,
+                $values['quantity'],
                 $direction,
                 (string)date('Y-m-d H:i:s'),
                 $warehouseId,
-                $this->validateVar(trim($param['recipient']), 'string', 'recipient')
+                $values['recipient']
 
             );
         }
@@ -369,7 +343,7 @@ class WarehouseController extends BaseController
         $direction = 'betweenWarehouses';
         $bodyParams = $request->getParsedBody();
         $transactions = [];
-        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'warehouseId');
+        $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'warehouseId');
         $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
 
         if ($warehouse === null) {
@@ -380,26 +354,20 @@ class WarehouseController extends BaseController
         }
 
         foreach ($bodyParams as $param) {
-            $this->jsonSchemaValidator->checkBySchema(
-                $param,
-                __DIR__ . '/../../resources/jsonSchema/movementProducts.json'
-            );
+            $values = $this->validator->movementProductsData($param);
 
-            $sku = $this->validateVar(trim($param['sku']), 'int', 'sku');
-            $quantity = $this->validateVar(trim($param['quantity']), 'int', 'quantity');
-            $newWarehouseId = $this->validateVar(trim($param['warehouseId']), 'int', 'warehouseId');
-            $newWarehouse = $this->warehouseService->getOne($newWarehouseId, $this->user);
+            $newWarehouse = $this->warehouseService->getOne($values['warehouseId'], $this->user);
 
-            $product = $this->productService->getOneBySku($sku, $this->user);
+            $product = $this->productService->getOneBySku($values, $this->user);
             if ($product === null) {
                 throw new \LogicException(
-                    "product with sku {$sku} not found!",
+                    "product with sku {$values['sku']} not found!",
                     400
                 );
             }
             if ($newWarehouse === null) {
                 throw new \LogicException(
-                    "warehouse with id {$newWarehouseId} not found!",
+                    "warehouse with id {$values['warehouseId']} not found!",
                     400
                 );
             }
@@ -407,11 +375,11 @@ class WarehouseController extends BaseController
             $transactions[] = new Transaction(
                 null,
                 $product,
-                $quantity,
+                $values['quantity'],
                 $direction,
                 (string)date('Y-m-d H:i:s'),
                 $warehouseId,
-                $newWarehouseId
+                $values['warehouseId']
             );
         }
 
@@ -435,7 +403,7 @@ class WarehouseController extends BaseController
     public function getResidues(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'id');
+        $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
         if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
             throw new \LogicException(
@@ -458,8 +426,8 @@ class WarehouseController extends BaseController
     public function getResiduesForDate(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'id');
-        $date = $this->validateVar(trim($args['date']), 'date', 'date');
+        $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'id');
+        $date = $this->validator->validateVar(trim($args['date']), 'date', 'date');
 
         if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
             throw new \LogicException(
@@ -482,7 +450,7 @@ class WarehouseController extends BaseController
     public function getMovements(Request $request, Response $response, $args)
     {
         $this->initUser($request);
-        $warehouseId = $this->validateVar(trim($args['id']), 'int', 'id');
+        $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
         if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
             throw new \LogicException(

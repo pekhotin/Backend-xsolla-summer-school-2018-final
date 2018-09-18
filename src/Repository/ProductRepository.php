@@ -35,15 +35,14 @@ class ProductRepository extends AbstractRepository
     }
     /**
      * @param int $id
-     * @param User $user
      *
      * @return Product|null
      */
-    public function findById($id, $user)
+    public function findById($id)
     {
         $row = $this->dbConnection->fetchAssoc(
-            'SELECT * FROM Products WHERE id = ? AND userId = ?',
-            [$id, $user->getId()]
+            'SELECT * FROM Products WHERE id = ?',
+            [$id]
         );
 
         if ($row === false) {
@@ -74,7 +73,7 @@ class ProductRepository extends AbstractRepository
             $values
         );
 
-        $product->setId($this->dbConnection->lastInsertId());
+        $product->setId((int)$this->dbConnection->lastInsertId());
     }
     /**
      * @param int $productId
@@ -90,11 +89,10 @@ class ProductRepository extends AbstractRepository
     }
     /**
      * @param Product $product
-     * @param User $user
      *
      * @return Product|null
      */
-    public function update($product, $user)
+    public function update($product)
     {
         $values = [];
 
@@ -121,12 +119,11 @@ class ProductRepository extends AbstractRepository
             'Products',
             $values,
             [
-                'id' => $product->getId(),
-                'userId' => $user->getId()
+                'id' => $product->getId()
             ]
         );
 
-        return $this->findById($product->getId(), $user);
+        return $this->findById($product->getId());
     }
     /**
      * @param User $user

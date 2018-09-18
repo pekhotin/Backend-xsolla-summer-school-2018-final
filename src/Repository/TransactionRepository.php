@@ -17,7 +17,7 @@ class TransactionRepository extends AbstractRepository
                 $transaction->getTransactionArray()
             );
 
-            $transaction->setId($this->dbConnection->lastInsertId());
+            $transaction->setId((int)$this->dbConnection->lastInsertId());
         }
     }
     /**

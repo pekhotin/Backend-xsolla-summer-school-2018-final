@@ -25,9 +25,9 @@ class WarehouseRepository extends AbstractRepository
         }
 
         $warehouse = new Warehouse(
-            $row['id'],
-            $row['address'],
-            $row['capacity']
+            (int)$row['id'],
+            (string)$row['address'],
+            (int)$row['capacity']
         );
 
         return $warehouse;
@@ -88,7 +88,7 @@ class WarehouseRepository extends AbstractRepository
             $values
         );
 
-        $warehouse->setId($this->dbConnection->lastInsertId());
+        $warehouse->setId((int)$this->dbConnection->lastInsertId());
     }
     /**
      * @param int $warehouseId
@@ -147,9 +147,9 @@ class WarehouseRepository extends AbstractRepository
 
         foreach ($rows as $row) {
             $warehouses[] = new Warehouse(
-                $row['id'],
-                $row['address'],
-                $row['capacity']
+                (int)$row['id'],
+                (string)$row['address'],
+                (int)$row['capacity']
             );
         }
 

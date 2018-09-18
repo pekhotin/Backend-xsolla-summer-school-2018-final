@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Validator;
 
 use JsonSchema\Exception\InvalidSchemaException;
 use JsonSchema\Exception\ValidationException;
@@ -36,7 +36,7 @@ class JsonSchemaValidator
 
         $jsonSchema = $this->getJsonSchema($schemaPath);
         $this->validator->check($dataJson, $jsonSchema);
-
+        //сделать нормальный вывод ошибок
         if (!$this->validator->isValid()) {
             throw new ValidationException($this->validator->getErrors()[0]['message'], 400);
         }
