@@ -41,28 +41,28 @@ class BaseValidator
 
             case 'int':
                 if (filter_var($var, FILTER_VALIDATE_INT) === false) {
-                    throw new \LogicException("{$name} is not integer!", 400);
+                    throw new \InvalidArgumentException("{$name} is not integer!", 400);
                 }
                 if ($var <= 0) {
-                    throw new \LogicException("{$name} must be greater than 0!", 400);
+                    throw new \InvalidArgumentException("{$name} must be greater than 0!", 400);
                 }
                 return (int)$var;
 
             case 'string':
                 if (empty($var)) {
-                    throw new \LogicException("{$name} is empty!", 400);
+                    throw new \InvalidArgumentException("{$name} is empty!", 400);
                 }
                 return (string)$var;
 
             case 'float':
                 if (filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
-                    throw new \LogicException( "{$name} is not float!", 400);
+                    throw new \InvalidArgumentException( "{$name} is not float!", 400);
                 }
                 return (float)$var;
             case 'date':
                 $date = date_parse_from_format('Y-m-d', $var);
                 if(checkdate($date['month'], $date['day'], $date['year']) === false) {
-                    throw new \LogicException("date format is not 'Y-m-d'!", 400);
+                    throw new \InvalidArgumentException("date format is not 'Y-m-d'!", 400);
                 }
                 return $var;
             default:
