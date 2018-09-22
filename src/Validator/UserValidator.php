@@ -26,14 +26,22 @@ class UserValidator extends BaseValidator
         $this->jsonSchemaValidator->checkBySchema($values, $this->schemaPath);
 
         foreach ($values as $key => &$value) {
-            $value = $this->validateVar(trim($value), 'string', $key);
+            if ($key !== 'password') {
+                $value = $this->validateVar($value, 'string', $key);
+            }
+        }
+
+        $values['password'] = $this->validateVar($values['password'], 'password', 'password');
+        $values['phoneNumber'] = $this->validateVar($values['phoneNumber'], 'phone',  'phoneNumber');
+
+        if(filter_var($values['email'], FILTER_VALIDATE_EMAIL) === false) {
+            throw new \InvalidArgumentException(
+                'email is incorrect.',
+                400
+            );
         }
 
         $this->jsonSchemaValidator->checkBySchema($values, $this->schemaPath);
-
-        if(filter_var($values['email'], FILTER_VALIDATE_EMAIL) === false) {
-            throw new \LogicException( "email is incorrect!", 400);
-        }
 
         return $values;
     }
@@ -53,8 +61,8 @@ class UserValidator extends BaseValidator
             !isset($data['password']) &&
             !isset($data['phoneNumber']
             )) {
-            throw new \LogicException(
-                'updates parameters are not found!',
+            throw new \InvalidArgumentException(
+                'Updates parameters are not found.',
                 400
             );
         }
@@ -75,20 +83,27 @@ class UserValidator extends BaseValidator
             ? $this->validateVar($data['email'], 'string', 'email')
             : $user->getEmail();
         $values['password'] = isset($data['password'])
-            ? $this->validateVar($data['password'], 'string', 'password')
-            : $user->getPasswordHash();
+            ? $this->validateVar($data['password'], 'password', 'password')
+            : 'qwerty123';
         $values['phoneNumber'] = isset($data['phoneNumber'])
-            ? $this->validateVar($data['phoneNumber'], 'string', 'phoneNumber')
+            ? $this->validateVar($data['phoneNumber'], 'phone', 'phoneNumber')
             : $user->getPhoneNumber();
 
         $this->jsonSchemaValidator->checkBySchema($values, $this->schemaPath);
 
-        $values['hash'] = password_hash($values['password'], PASSWORD_DEFAULT);
-        unset($values['password']);
-
         if(filter_var($values['email'], FILTER_VALIDATE_EMAIL) === false) {
-            throw new \LogicException( "email is incorrect!", 400);
+            throw new \InvalidArgumentException(
+                "email is incorrect.",
+                400
+            );
         }
+        if (isset($data['password']) !== false) {
+            $values['hash'] = password_hash($values['password'], PASSWORD_DEFAULT);
+
+        } else {
+            $values['hash'] = $user->getPasswordHash();
+        }
+        unset($values['password']);
 
         return $values;
     }

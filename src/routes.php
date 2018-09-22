@@ -30,5 +30,5 @@ $app->group('/api/v1', function () use ($app) {
     $app->get('/products/{sku}/residues/{date}', 'product.controller:getResiduesForDate');
     $app->get('/products/{sku}/movements', 'product.controller:getMovements');
 
-    $app->get('/new', 'new.controller:getConnect');
+    //$app->get('/new', 'new.controller:getConnect');
 });

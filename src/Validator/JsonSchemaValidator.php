@@ -21,12 +21,9 @@ class JsonSchemaValidator
     {
         $this->validator = $validator;
     }
-
     /**
-     * @param $data
+     * @param array $data
      * @param string $schemaPath
-     *
-     * @return bool
      */
     public function checkBySchema($data, string $schemaPath)
     {
@@ -38,18 +35,20 @@ class JsonSchemaValidator
         $this->validator->check($dataJson, $jsonSchema);
         //сделать нормальный вывод ошибок
         if (!$this->validator->isValid()) {
-            throw new ValidationException($this->validator->getErrors()[0]['message'], 400);
+            throw new ValidationException($this->getErrorMessage($this->validator->getErrors()), 400);
         }
-
-        return true;
     }
-
+    /**
+     * @param string $schemaPath
+     *
+     * @return mixed
+     */
     private function getJsonSchema($schemaPath)
     {
         if (!file_exists($schemaPath)) {
             throw new InvalidSchemaException(
                 "Json schema not found by path $schemaPath",
-                404
+                500
             );
         }
         $jsonSchema = json_decode(file_get_contents($schemaPath));
@@ -57,11 +56,31 @@ class JsonSchemaValidator
         if ($jsonSchema === null) {
             throw new InvalidSchemaException(
                 "Incorrect json schema in {$schemaPath}",
-                400
+                500
             );
         }
 
         return $jsonSchema;
+    }
+    /**
+     * @param $errors
+     *
+     * @return string
+     */
+    private function getErrorMessage($errors)
+    {
+        $message = '';
+        foreach ($errors as $error) {
+            $constraint = $error['constraint'];
+            if ($constraint === 'minLength' || $constraint === 'maxLength' || $constraint === 'type' || $constraint === 'minimum') {
+                $message = $message . "The property {$error['property']} is incorrect. {$error['message']}. ";
+            }
+            if ($constraint === 'additionalProp' || $constraint === 'required') {
+                $message = $message . $error['message'] . '. ';
+            }
+        }
+
+        return $message;
     }
 
 }

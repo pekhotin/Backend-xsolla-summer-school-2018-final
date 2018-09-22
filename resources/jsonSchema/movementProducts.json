@@ -1,15 +1,19 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "sku": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 1
     },
     "quantity": {
-      "type": "integer"
+      "type": "integer",
+      "minimum":1
     },
     "warehouseId": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 1
     }
   },
   "required": [

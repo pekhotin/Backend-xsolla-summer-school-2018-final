@@ -1,0 +1,18 @@
+<dataset>
+    <Users
+            login ="test1"
+            name="Nalabal"
+            surname="Nadjava"
+            hash="ejrherhejkrhe"
+            organization="Xsolla"
+            email="ivanov@gmail.com"
+            phoneNumber="88005553535"/>
+    <Users
+            login ="test2"
+            name="Nalabal"
+            surname="Nadjava"
+            hash="ejrherhejkrhe"
+            organization="Xsolla"
+            email="ivanova@gmail.com"
+            phoneNumber="88005553535"/>
+</dataset>
