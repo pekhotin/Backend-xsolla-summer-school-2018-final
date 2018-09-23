@@ -14,16 +14,7 @@ class ConnectionFactory
      */
     public static function getConnection()
     {
-        $configParams = [
-            'driver' => 'pdo_mysql',
-            'host' => 'localhost',
-            'dbname' => 'mvc',
-            'user' => 'non-root',
-            'password' => '12345',
-            'port' => 3306,
-            'charset' => 'utf8',
-
-        ];
+        $configParams = require __DIR__ . '/../../config/dbal-config.php';
 
 	    $config = new Configuration();
 

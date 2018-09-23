@@ -40,12 +40,20 @@ abstract class AbstractDatabaseTestCase extends TestCase
     final public function getConnection()
     {
         if ($this->conn === null) {
+            $configParams = require __DIR__ . '/../config/pdo-config.php';
             if (self::$pdo === null) {
-                self::$pdo = new PDOConnection($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+                self::$pdo = new PDOConnection(
+                    $configParams['dsn'],
+                    $configParams['username'],
+                    $configParams['password']
+                );
             }
-            $query = file_get_contents(__DIR__ . '/script.sql');
+            $query = file_get_contents(__DIR__ . '/../resources/script.sql');
             self::$pdo->query($query);
-            $this->conn = $this->createDefaultDBConnection(self::$pdo, $GLOBALS['DB_DBNAME']);
+            $this->conn = $this->createDefaultDBConnection(
+                self::$pdo,
+                $configParams['dbname']
+            );
         }
 
         return $this->conn;

@@ -26,7 +26,6 @@ class ProductValidatorTest extends XmlTestCase
         );
         $this->fixture = new ProductValidator();
     }
-
     /**
      * @dataProvider dataValidateInsertData
      */
@@ -41,7 +40,6 @@ class ProductValidatorTest extends XmlTestCase
         $values = $this->fixture->validateInsertData($data);
 
         $this->assertEquals($values, $expectedValues);
-
     }
 
     public function dataValidateInsertData()

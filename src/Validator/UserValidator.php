@@ -66,6 +66,8 @@ class UserValidator extends BaseValidator
             );
         }
 
+        $values = [];
+
         $values['name'] = isset($data['name'])
             ? $this->validateVar($data['name'], 'string', 'name')
             : $user->getName();

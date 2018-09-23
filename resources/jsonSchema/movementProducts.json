@@ -5,15 +5,18 @@
   "properties": {
     "sku": {
       "type": "integer",
-      "minimum": 1
+      "minimum": 1,
+      "maximum": 2147483647
     },
     "quantity": {
       "type": "integer",
-      "minimum":1
+      "minimum":1,
+      "maximum": 2147483647
     },
     "warehouseId": {
       "type": "integer",
-      "minimum": 1
+      "minimum": 1,
+      "maximum": 2147483647
     }
   },
   "required": [

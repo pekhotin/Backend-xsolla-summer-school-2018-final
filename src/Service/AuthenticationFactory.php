@@ -12,7 +12,12 @@ class AuthenticationFactory
      */
     public static function getAuthentication()
     {
-        $dbh = new PDOConnection('mysql:host=localhost;dbname=mvc', 'root', 'root');
+        $configParams = require __DIR__ . '/../../config/pdo-config.php';
+        $dbh = new PDOConnection(
+            $configParams['dsn'] . 'dbname=' . $configParams['dbname'],
+            $configParams['username'],
+            $configParams['password']
+        );
 
         return new HttpBasicAuthentication([
             'authenticator' => new HttpBasicAuthentication\PdoAuthenticator([

@@ -23,8 +23,8 @@ class WarehouseValidator extends BaseValidator
 
         $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
 
-        $values['address'] = $this->validateVar(trim($values['address']), 'string', 'address');
-        $values['capacity'] = $this->validateVar($values['capacity'], 'int', 'capacity');
+        $values['address'] = $this->validateVar($data['address'], 'string', 'address');
+        $values['capacity'] = $this->validateVar($data['capacity'], 'int', 'capacity');
 
         $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
 
@@ -40,71 +40,78 @@ class WarehouseValidator extends BaseValidator
     public function validateUpdateData($warehouse, $data)
     {
         if (!isset($data['address']) && !isset($data['capacity'])) {
-            throw new \LogicException(
-                'updates parameters are not found!',
+            throw new \InvalidArgumentException(
+                'updates parameters are not found.',
                 400
             );
         }
 
-        $values = [];
-
-        $values['address'] = isset($data['address'])
-            ? $this->validateVar(trim($data['address']), 'string', 'address')
+        $data['address'] = isset($data['address'])
+            ? $this->validateVar($data['address'], 'string', 'address')
             : $warehouse->getAddress();
-        $values['capacity'] = isset($data['capacity'])
+        $data['capacity'] = isset($data['capacity'])
             ? $this->validateVar($data['capacity'], 'int', 'capacity')
             : $warehouse->getCapacity();
 
-        $this->jsonSchemaValidator->checkBySchema($values, $this->schemaPath);
+        $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
 
-        return $values;
+        return $data;
     }
 
     public function dispatchProductsData ($data)
     {
-        $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
+        $this->jsonSchemaValidator->checkBySchema(
+            $data,
+            __DIR__ . '/../../resources/jsonSchema/dispatchProducts.json'
+        );
 
-        $values['sku'] = $this->validateVar($data['sku'], 'int', 'sku');
-        $values['quantity'] = $this->validateVar($data['quantity'], 'int', 'quantity');
-        $values['recipient'] = $this->validateVar(trim($data['recipient']), 'string', 'recipient');
+        $data['sku'] = $this->validateVar($data['sku'], 'int', 'sku');
+        $data['quantity'] = $this->validateVar($data['quantity'], 'int', 'quantity');
+        $data['recipient'] = $this->validateVar($data['recipient'], 'string', 'recipient');
 
         $this->jsonSchemaValidator->checkBySchema(
             $data,
             __DIR__ . '/../../resources/jsonSchema/dispatchProducts.json'
         );
 
-        return $values;
+        return $data;
     }
 
     public function receiptProductsData ($data)
     {
-        $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
+        $this->jsonSchemaValidator->checkBySchema(
+            $data,
+            __DIR__ . '/../../resources/jsonSchema/receiptProducts.json'
+        );
 
-        $values['sku'] = $this->validateVar($data['sku'], 'int', 'sku');
-        $values['quantity'] = $this->validateVar($data['quantity'], 'int', 'quantity');
-        $values['sender'] = $this->validateVar(trim($data['sender']), 'string', 'sender');
+        $data['sku'] = $this->validateVar($data['sku'], 'int', 'sku');
+        $data['quantity'] = $this->validateVar($data['quantity'], 'int', 'quantity');
+        $data['sender'] = $this->validateVar($data['sender'], 'string', 'sender');
 
         $this->jsonSchemaValidator->checkBySchema(
             $data,
             __DIR__ . '/../../resources/jsonSchema/receiptProducts.json'
         );
 
-        return $values;
+        return $data;
     }
 
     public function movementProductsData($data)
     {
-        $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
+        $this->jsonSchemaValidator->checkBySchema(
+            $data,
+            __DIR__ . '/../../resources/jsonSchema/movementProducts.json'
+        );
 
-        $values['sku'] = $this->validateVar($data['sku'], 'int', 'sku');
-        $values['quantity'] = $this->validateVar($data['quantity'], 'int', 'quantity');
-        $values['warehouseId'] = $this->validateVar($data['warehouseId'], 'int', 'warehouseId');
+        $data['sku'] = $this->validateVar($data['sku'], 'int', 'sku');
+        $data['quantity'] = $this->validateVar($data['quantity'], 'int', 'quantity');
+        $data['warehouseId'] = $this->validateVar($data['warehouseId'], 'int', 'warehouseId');
 
         $this->jsonSchemaValidator->checkBySchema(
             $data,
             __DIR__ . '/../../resources/jsonSchema/movementProducts.json'
         );
 
-        return $values;
+        return $data;
     }
 }
