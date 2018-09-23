@@ -40,7 +40,7 @@ abstract class AbstractDatabaseTestCase extends TestCase
     final public function getConnection()
     {
         if ($this->conn === null) {
-            $configParams = require __DIR__ . '/../config/pdo-config.php';
+            $configParams = require __DIR__ . '/../config/config.php';
             if (self::$pdo === null) {
                 self::$pdo = new PDOConnection(
                     $configParams['dsn'],

@@ -12,7 +12,7 @@ class AuthenticationFactory
      */
     public static function getAuthentication()
     {
-        $configParams = require __DIR__ . '/../../config/pdo-config.php';
+        $configParams = require __DIR__ . '/../../config/config.php';
         $dbh = new PDOConnection(
             $configParams['dsn'] . 'dbname=' . $configParams['dbname'],
             $configParams['username'],

@@ -14,12 +14,18 @@ class ConnectionFactory
      */
     public static function getConnection()
     {
-        $configParams = require __DIR__ . '/../../config/dbal-config.php';
-
+        $configParams = require __DIR__ . '/../../config/config.php';
 	    $config = new Configuration();
 
         return DriverManager::getConnection(
-        	$configParams, 
+        	[
+                'driver' => 'pdo_mysql',
+                'host' => $configParams['host'],
+                'dbname' => $configParams['dbname'],
+                'user' => $configParams['username'],
+                'password' => $configParams['password'],
+                'charset' => 'utf8'
+            ],
         	$config
     	);
     }
