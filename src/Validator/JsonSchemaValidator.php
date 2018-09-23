@@ -72,7 +72,12 @@ class JsonSchemaValidator
         $message = '';
         foreach ($errors as $error) {
             $constraint = $error['constraint'];
-            if ($constraint === 'minLength' || $constraint === 'maxLength' || $constraint === 'type' || $constraint === 'minimum') {
+            if ($constraint === 'minLength' ||
+                $constraint === 'maxLength' ||
+                $constraint === 'type' ||
+                $constraint === 'minimum' ||
+                $constraint === 'maximum'
+            ) {
                 $message = $message . "The property {$error['property']} is incorrect. {$error['message']}. ";
             }
             if ($constraint === 'additionalProp' || $constraint === 'required') {

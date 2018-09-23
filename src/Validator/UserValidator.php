@@ -15,7 +15,6 @@ class UserValidator extends BaseValidator
         parent::__construct();
         $this->schemaPath = __DIR__ . '/../../resources/jsonSchema/user.json';
     }
-    // добавить проверку для номера телефона
     /**
      * @param array $values
      *

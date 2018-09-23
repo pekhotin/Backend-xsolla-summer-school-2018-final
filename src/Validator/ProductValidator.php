@@ -18,10 +18,10 @@ class ProductValidator extends BaseValidator
 
         $values = [];
         $values['sku'] = $this->validateVar($data['sku'], 'int', 'sku');
-        $values['name'] = $this->validateVar(trim($data['name']), 'string', 'name');
+        $values['name'] = $this->validateVar($data['name'], 'string', 'name');
         $values['price'] = $this->validateVar($data['price'], 'float', 'price');
         $values['size'] = $this->validateVar($data['size'], 'int', 'size');
-        $values['type'] = $this->validateVar(trim($data['type']), 'string', 'type');
+        $values['type'] = $this->validateVar($data['type'], 'string', 'type');
 
         $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
 
@@ -31,33 +31,41 @@ class ProductValidator extends BaseValidator
     /**
      * @param array $data
      * @param Product $product
+     *
+     * @return array
      */
     public function validateUpdateData($data, $product)
     {
-        if (!isset($data['name']) && !isset($data['price']) && !isset($data['size']) && !isset($data['type'])) {
-            throw new \LogicException(
-                'updates parameters are not found!',
+        if (!isset($data['name']) &&
+            !isset($data['price']) &&
+            !isset($data['size']) &&
+            !isset($data['type']) &&
+            !isset($data['sku'])
+        ) {
+            throw new \InvalidArgumentException(
+                'Updates parameters are not found.',
                 400
             );
         }
 
-        $values = [];
-
-        $values['name'] = isset($data['name'])
-            ? $this->validateVar(trim($data['name']), 'string', 'name')
+        $data['sku'] = isset($data['sku'])
+            ? $this->validateVar($data['sku'], 'int', 'sku')
+            : $product->getSku();
+        $data['name'] = isset($data['name'])
+            ? $this->validateVar($data['name'], 'string', 'name')
             : $product->getName();
-        $values['price'] = isset($data['price'])
+        $data['price'] = isset($data['price'])
             ? $this->validateVar($data['price'], 'float', 'price')
             : $product->getPrice();
-        $values['size'] = isset($data['size'])
+        $data['size'] = isset($data['size'])
             ? $this->validateVar($data['size'], 'int', 'size')
             : $product->getSize();
-        $values['type'] = isset($data['type'])
+        $data['type'] = isset($data['type'])
             ? $this->validateVar($data['type'], 'string', 'type')
             : $product->getType();
 
-        $this->jsonSchemaValidator->checkBySchema($values, $this->schemaPath);
+        $this->jsonSchemaValidator->checkBySchema($data, $this->schemaPath);
 
-
+        return $data;
     }
 }

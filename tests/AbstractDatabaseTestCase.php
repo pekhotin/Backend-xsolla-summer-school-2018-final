@@ -16,10 +16,6 @@ abstract class AbstractDatabaseTestCase extends TestCase
      */
     protected $fixture;
     /**
-     * @var User
-     */
-    protected $user;
-    /**
      * @var PDOConnection
      */
     static private $pdo = null;
@@ -30,16 +26,7 @@ abstract class AbstractDatabaseTestCase extends TestCase
 
     protected function setUp()
     {
-        $this->user = new User(
-            1,
-            'Petr',
-            'Петр',
-            'Иванов',
-            'ejrherhejkrhe',
-            'PSU',
-            'petr@gmail.com',
-            '88005553535'
-        );
+
     }
 
     protected function tearDown()

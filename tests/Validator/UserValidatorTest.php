@@ -4,17 +4,29 @@ namespace Tests\Validator;
 
 use App\Model\User;
 use App\Validator\UserValidator;
-use http\Exception\InvalidArgumentException;
 use JsonSchema\Exception\ValidationException;
 use Tests\XmlTestCase;
 
 class UserValidatorTest extends XmlTestCase
 {
 
+    /**
+     * @var User
+     */
+    protected $user;
 
     protected function setUp()
     {
-        parent::setUp();
+        $this->user = new User(
+            1,
+            'Petr',
+            'Петр',
+            'Иванов',
+            'ejrherhejkrhe',
+            'PSU',
+            'petr@gmail.com',
+            '88005553535'
+        );
         $this->fixture = new UserValidator();
     }
     /**
@@ -562,7 +574,7 @@ class UserValidatorTest extends XmlTestCase
                 'exception' => [
                     'class' => \InvalidArgumentException::class,
                     'code' => '400',
-                    'message' => 'The property login is incorrect. Integer value found, but a string is required.'
+                    'message' => 'The property login is incorrect. A string value is required.'
                 ]
             ]
         ];
@@ -603,7 +615,7 @@ class UserValidatorTest extends XmlTestCase
                 'exception' => [
                     'class' => \InvalidArgumentException::class,
                     'code' => '400',
-                    'message' => 'The property name is incorrect. Integer value found, but a string is required.'
+                    'message' => 'The property name is incorrect. A string value is required.'
                 ]
             ]
         ];
@@ -642,7 +654,7 @@ class UserValidatorTest extends XmlTestCase
                 'exception' => [
                     'class' => \InvalidArgumentException::class,
                     'code' => '400',
-                    'message' => 'The property surname is incorrect. Integer value found, but a string is required.'
+                    'message' => 'The property surname is incorrect. A string value is required.'
                 ]
             ]
         ];
@@ -695,7 +707,7 @@ class UserValidatorTest extends XmlTestCase
                 'exception' => [
                     'class' => \InvalidArgumentException::class,
                     'code' => '400',
-                    'message' => 'The property password is incorrect. Integer value found, but a string is required.'
+                    'message' => 'The property password is incorrect. A string value is required.'
                 ]
             ]
         ];
@@ -735,7 +747,7 @@ class UserValidatorTest extends XmlTestCase
                 'exception' => [
                     'class' => \InvalidArgumentException::class,
                     'code' => '400',
-                    'message' => 'The property organization is incorrect. Integer value found, but a string is required. '
+                    'message' => 'The property organization is incorrect. A string value is required.'
                 ]
             ]
         ];
@@ -775,7 +787,7 @@ class UserValidatorTest extends XmlTestCase
                 'exception' => [
                     'class' => \InvalidArgumentException::class,
                     'code' => '400',
-                    'message' => 'The property email is incorrect. Integer value found, but a string is required. '
+                    'message' => 'The property email is incorrect. A string value is required.'
                 ]
             ]
         ];
@@ -953,7 +965,7 @@ class UserValidatorTest extends XmlTestCase
                 'exception' => [
                     'class' => \InvalidArgumentException::class,
                     'code' => '400',
-                    'message' => 'The property organization is incorrect. Integer value found, but a string is required. '
+                    'message' => 'The property organization is incorrect. A string value is required.'
                 ]
             ]
         ];

@@ -51,7 +51,7 @@ class BaseValidator
             case 'string':
                 if (is_string($var) === false) {
                     throw new \InvalidArgumentException(
-                        "The property {$name} is incorrect. Integer value found, but a string is required. ",
+                        "The property {$name} is incorrect. A string value is required.",
                         400
                     );
                 }
@@ -91,7 +91,7 @@ class BaseValidator
             case 'password':
                 if (is_string($var) === false) {
                     throw new \InvalidArgumentException(
-                        "The property {$name} is incorrect. Integer value found, but a string is required. ",
+                        "The property {$name} is incorrect. A string value is required.",
                         400
                     );
                 }
