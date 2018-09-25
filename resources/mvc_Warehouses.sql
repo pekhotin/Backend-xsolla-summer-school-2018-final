@@ -1,0 +1,9 @@
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (1, 'Perm Lenina 1', 100000, 1);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (2, 'Perm Vosstanya 99', 500000, 1);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (3, 'Perm Kompros 1', 50000, 1);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (4, 'Perm Kompros 2', 150000, 1);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (5, 'Perm Lenina 1', 10000, 2);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (6, 'Perm Plehanova 1', 100000, 2);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (7, 'Perm Lunacharskogo 34', 500000, 1);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (8, 'Perm Kompros 12', 100000, 2);
+INSERT INTO mvc.Warehouses (id, address, capacity, userId) VALUES (9, 'Perm Zvezdnaya 23', 255000, 1);

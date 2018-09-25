@@ -22,6 +22,7 @@ class StateRepository extends AbstractRepository
                 date('Y-m-d')
             ]
         );
+
         if ($quantity === false) {
             return -1;
         }
@@ -85,24 +86,6 @@ class StateRepository extends AbstractRepository
         );
     }
     /**
-     * @param int $warehouseId
-     * @param int $productId
-     *
-     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
-     */
-    public function delete($warehouseId, $productId)
-    {
-        $this->dbConnection->delete(
-            'State',
-            [
-                'warehouseId' => $warehouseId,
-                'productId' => $productId,
-                'date' => date('Y-m-d')
-            ]
-        );
-    }
-
-    /**
      * @param Transaction[] $transactions
      *
      * @throws \Doctrine\DBAL\ConnectionException
@@ -140,7 +123,6 @@ class StateRepository extends AbstractRepository
             throw $e;
         }
     }
-
     /**
      * @param Transaction[] $transactions
      *
@@ -174,11 +156,28 @@ class StateRepository extends AbstractRepository
                 }
             }
             $this->dbConnection->commit();
-        } catch (\Exception $e) {
+        } catch (\LogicException $e) {
             $this->dbConnection->rollBack();
             throw $e;
         }
 
+    }
+    /**
+     * @param Transaction[] $transactions
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
+     */
+    public function movementProducts($transactions)
+    {
+        $this->dbConnection->beginTransaction();
+        try {
+            $this->removeProducts($transactions);
+            $this->addProducts($transactions);
+            $this->dbConnection->commit();
+        } catch (\Exception $e) {
+            $this->dbConnection->rollBack();
+            throw $e;
+        }
     }
     /**
      * @param int $warehouseId
@@ -210,7 +209,11 @@ class StateRepository extends AbstractRepository
 
         return $filling;
     }
-
+    /**
+     * @param int $warehouseId
+     *
+     * @return int|null
+     */
     public function getFreePlace($warehouseId)
     {
         $row = $this->dbConnection->fetchAssoc(

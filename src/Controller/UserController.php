@@ -16,7 +16,6 @@ class UserController extends BaseController
         parent::__construct($app, $userService);
         $this->validator = new UserValidator();
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -105,7 +104,6 @@ class UserController extends BaseController
 
         return $response->withJson($this->user->getUserArray(), 200);
     }
-
     /**
      * @param Request $request
      * @param Response $response

@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Validator\BaseValidator;
-use JsonSchema\Validator;
 use Slim\App;
 use App\Service\UserService;
 use Slim\Http\Request;
@@ -15,12 +14,10 @@ abstract class BaseController
      * @var App
      */
     protected $app;
-
     /**
      * @var UserService
      */
     protected $userService;
-
     /**
      * @var User
      */
@@ -29,7 +26,6 @@ abstract class BaseController
      * @var BaseValidator
      */
     protected $validator;
-
     /**
      * BaseController constructor.
      *
@@ -41,7 +37,9 @@ abstract class BaseController
         $this->app = $app;
         $this->userService = $userService;
     }
-
+    /**
+     * @param Request $request
+     */
     protected function initUser(Request $request)
     {
         $login = $request->getAttribute('user');

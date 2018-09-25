@@ -11,7 +11,6 @@ class StateService
      * @var StateRepository
      */
     private $stateRepository;
-
     /**
      * StateService constructor.
      *
@@ -40,14 +39,13 @@ class StateService
         $this->stateRepository->removeProducts($transactions);
     }
     /**
-     * @param Transaction[] $transactions
+     * @param $transactions
      *
-     * @throws \Exception
+     * @throws \Doctrine\DBAL\ConnectionException
      */
     public function movementProducts($transactions)
     {
-        $this->stateRepository->removeProducts($transactions);
-        $this->stateRepository->addProducts($transactions);
+        return $this->stateRepository->movementProducts($transactions);
     }
     /**
      * @param int $warehouseId
@@ -107,3 +105,4 @@ class StateService
         return $this->stateRepository->getResiduesByProductForDate($productId, $date);
     }
 }
+

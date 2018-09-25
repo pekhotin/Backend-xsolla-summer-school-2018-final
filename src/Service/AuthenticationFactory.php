@@ -14,7 +14,7 @@ class AuthenticationFactory
     {
         $configParams = require __DIR__ . '/../../config/config.php';
         $dbh = new PDOConnection(
-            $configParams['dsn'] . 'dbname=' . $configParams['dbname'],
+            $configParams['dsn'] . ';dbname=' . $configParams['dbname'],
             $configParams['username'],
             $configParams['password']
         );
@@ -27,7 +27,7 @@ class AuthenticationFactory
             ]),
             'path' => ['/api/v1'],
             'secure' => false,
-            'ignore' => ['/api/v1/users', '/api/v1/new'],
+            'ignore' => ['/api/v1/users'],
             'before' => function ($request, $arg) {
                 return $request->withAttribute('user', $arg['user']);
             }

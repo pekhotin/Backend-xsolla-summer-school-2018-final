@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Model;
-
 
 class Transaction
 {
@@ -167,7 +165,9 @@ class Transaction
             'recipient' => $this->recipient
         ];
     }
-
+    /**
+     * @return array
+     */
     public function getTransactionInfo()
     {
         return [

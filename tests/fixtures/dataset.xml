@@ -1,0 +1,530 @@
+<dataset>
+    <Users
+        id = "1"
+        login = "test1"
+        name = "Дуремар"
+        surname = "Ржевский"
+        hash = "$2y$10$pllP8SaAQ6ZqNZY7.1bXve0E14AaCS0fdInsgQbhdO8IypghGWiYu"
+        organization = "PSU"
+        email = "rzhevsky.dk@gmail.com"
+        phoneNumber = "88005553535"/>
+    <Users
+        id = "2"
+        login = "test2"
+        name = "Пенелопа"
+        surname = "Дробыш"
+        hash = "$2y$10$l6UdWlQxMlE6Ln9AAGfEiefpLM6NSQTU9xOglf4yiLEKAwvxLTIfu"
+        organization = "PSU"
+        email = "penelopa_2.0@gmail.com"
+        phoneNumber = "8(999)999-99-99"/>
+    <Products
+        id = "1"
+        sku = "5555"
+        name = "Куриное филе охлажденное"
+        price = "250"
+        size = "3"
+        type = "food"
+        userId = "1"/>
+    <Products
+        id = "2"
+        sku = "5555"
+        name = "Куриное филе охлажденное"
+        price = "230"
+        size = "3"
+        type = "food"
+        userId = "2"/>
+    <Products
+        id = "3"
+        sku = "125"
+        name = "Морковь свежая"
+        price = "50"
+        size = "5"
+        type = "food"
+        userId = "1"/>
+    <Products
+        id = "4"
+        sku = "115"
+        name = "Шампунь Xеден шолдерс"
+        price = "150"
+        size = "1"
+        type = "household"
+        userId = "1"/>
+    <Products
+        id = "5"
+        sku = "114"
+        name = "Тапки резиновые с дырками"
+        price = "200"
+        size = "5"
+        type = "household"
+        userId = "1"/>
+    <Products
+        id = "6"
+        sku = "2145"
+        name = "Термос для еды с контейнерами"
+        price = "650"
+        size = "3"
+        type = "household"
+        userId = "1"/>
+    <Products
+        id = "7"
+        sku = "114"
+        name = "Тапки резиновые с дырками"
+        price = "250"
+        size = "5"
+        type = "household"
+        userId = "2"/>
+    <Products
+        id = "8"
+        sku = "785"
+        name = "Молоко 3,2% 1 литр"
+        price = "50"
+        size = "3"
+        type = "food"
+        userId = "1"/>
+    <Products
+        id = "9"
+        sku = "111"
+        name = "Арабская поэзия средних веков"
+        price = "350"
+        size = "1"
+        type = "book"
+        userId = "2"/>
+    <Products
+        id = "10"
+        sku = "5439"
+        name = "Героический эпос народов СССР"
+        price = "350"
+        size = "1"
+        type = "book"
+        userId = "2"/>
+    <Products
+        id = "11"
+        sku = "65629"
+        name = "Помидоры Абакан"
+        price = "70"
+        size = "5"
+        type = "food"
+        userId = "1"/>
+    <Warehouses
+        id = "1"
+        address = "Perm Lenina 1"
+        capacity = "100000"
+        userId = "1"/>
+    <Warehouses
+        id = "2"
+        address = "Perm Vosstanya 99"
+        capacity = "500000"
+        userId = "1"/>
+    <Warehouses
+        id = "3"
+        address = "Perm Kompros 1"
+        capacity = "50000"
+        userId = "1"/>
+    <Warehouses
+        id = "4"
+        address = "Perm Kompros 2"
+        capacity = "150000"
+        userId = "1"/>
+    <Warehouses
+        id = "5"
+        address = "Perm Lenina 1"
+        capacity = "10000"
+        userId = "2"/>
+    <Warehouses
+        id = "6"
+        address = "Perm Plehanova 1"
+        capacity = "100000"
+        userId = "2"/>
+    <Warehouses
+        id = "7"
+        address = "Perm Lunacharskogo 34"
+        capacity = "500000"
+        userId = "1"/>
+    <Warehouses
+        id = "8"
+        address = "Perm Kompros 12"
+        capacity = "100000"
+        userId = "2"/>
+    <State
+        id = "1"
+        warehouseId = "1"
+        productId = "4"
+        quantity = "0"
+        date = "2018-09-01"/>
+    <State
+        id = "2"
+        warehouseId = "1"
+        productId = "5"
+        quantity = "80"
+        date = "2018-09-01"/>
+    <State
+        id = "3"
+        warehouseId = "1"
+        productId = "8"
+        quantity = "50"
+        date = "2018-09-01"/>
+    <State
+        id = "4"
+        warehouseId = "2"
+        productId = "1"
+        quantity = "100"
+        date = "2018-09-01"/>
+    <State
+        id = "5"
+        warehouseId = "2"
+        productId = "6"
+        quantity = "100"
+        date = "2018-09-01"/>
+    <State
+        id = "6"
+        warehouseId = "2"
+        productId = "8"
+        quantity = "200"
+        date = "2018-09-01"/>
+    <State
+        id = "7"
+        warehouseId = "3"
+        productId = "3"
+        quantity = "500"
+        date = "2018-09-01"/>
+    <State
+        id = "8"
+        warehouseId = "5"
+        productId = "2"
+        quantity = "500"
+        date = "2018-09-01"/>
+    <State
+        id = "9"
+        warehouseId = "6"
+        productId = "2"
+        quantity = "200"
+        date = "2018-09-01"/>
+    <State
+        id = "10"
+        warehouseId = "4"
+        productId = "8"
+        quantity = "50"
+        date = "2018-09-01"/>
+    <State
+        id = "11"
+        warehouseId = "3"
+        productId = "5"
+        quantity = "20"
+        date = "2018-09-01"/>
+    <State
+        id = "12"
+        warehouseId = "6"
+        productId = "2"
+        quantity = "200"
+        date = "2018-09-02"/>
+    <State
+        id = "13"
+        warehouseId = "5"
+        productId = "2"
+        quantity = "700"
+        date = "2018-09-02"/>
+    <State
+        id = "14"
+        warehouseId = "4"
+        productId = "8"
+        quantity = "0"
+        date = "2018-09-02"/>
+    <State
+        id = "15"
+        warehouseId = "3"
+        productId = "8"
+        quantity = "150"
+        date = "2018-09-02"/>
+    <State
+        id = "16"
+        warehouseId = "3"
+        productId = "5"
+        quantity = "0"
+        date = "2018-09-02"/>
+    <State
+        id = "17"
+        warehouseId = "1"
+        productId = "5"
+        quantity = "100"
+        date = "2018-09-02"/>
+    <State
+        id = "18"
+        warehouseId = "2"
+        productId = "8"
+        quantity = "100"
+        date = "2018-09-02"/>
+    <State
+        id = "19"
+        warehouseId = "2"
+        productId = "6"
+        quantity = "0"
+        date = "2018-09-02"/>
+    <State
+        id = "20"
+        warehouseId = "1"
+        productId = "8"
+        quantity = "150"
+        date = "2018-09-02"/>
+    <State
+        id = "21"
+        warehouseId = "1"
+        productId = "8"
+        quantity = "250"
+        date = "2018-09-25"/>
+    <Transactions
+        id = "1"
+        productId = "4"
+        quantity = "50"
+        direction = "receipt"
+        datetime = "2018-09-01 13:05:45"
+        sender  = "Пазолини Корней Свястоплясович"
+        recipient = "1"/>
+    <Transactions
+        id = "2"
+        productId = "5"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:05:45"
+        sender = "Петров Иван Иванович"
+        recipient= "1"/>
+    <Transactions
+        id = "3"
+        productId = "8"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:05:45"
+        sender = "Иванов Иван Иванович"
+        recipient= "1"/>
+    <Transactions
+        id = "4"
+        productId = "1"
+        quantity = "50"
+        direction = "receipt"
+        datetime = "2018-09-01 13:06:43"
+        sender = "Пазолини Корней Свястоплясович"
+        recipient= "2"/>
+    <Transactions
+        id = "5"
+        productId = "6"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:06:43"
+        sender = "Петров Иван Иванович"
+        recipient= "2"/>
+    <Transactions
+        id = "6"
+        productId = "8"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:06:43"
+        sender = "Иванов Иван Иванович"
+        recipient= "2"/>
+    <Transactions
+        id = "7"
+        productId = "1"
+        quantity = "50"
+        direction = "receipt"
+        datetime = "2018-09-01 13:07:13"
+        sender = "Пазолини Корней Свястоплясович"
+        recipient= "2"/>
+    <Transactions
+        id = "8"
+        productId = "6"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:07:13"
+        sender = "Петров Иван Иванович"
+        recipient= "2"/>
+    <Transactions
+        id = "9"
+        productId = "8"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:07:13"
+        sender = "Грозный Вахтанг Петрович"
+        recipient= "2"/>
+    <Transactions
+        id = "10"
+        productId = "3"
+        quantity = "500"
+        direction = "receipt"
+        datetime = "2018-09-01 13:07:49"
+        sender = "Петров Иван Иванович"
+        recipient= "3"/>
+    <Transactions
+        id = "11"
+        productId = "2"
+        quantity = "500"
+        direction = "receipt"
+        datetime = "2018-09-01 13:16:13"
+        sender = "Иванов Иван Иванович"
+        recipient= "5"/>
+    <Transactions
+        id = "12"
+        productId = "2"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:16:31"
+        sender = "Иванов Иван Иванович"
+        recipient= "6"/>
+    <Transactions
+        id = "13"
+        productId = "4"
+        quantity = "50"
+        direction = "dispatch"
+        datetime = "2018-09-01 13:20:39"
+        sender = "1"
+        recipient= "Петров Иван Иванович"/>
+    <Transactions
+        id = "14"
+        productId = "6"
+        quantity = "100"
+        direction = "dispatch"
+        datetime = "2018-09-01 13:22:24"
+        sender = "2"
+        recipient= "Мандаринкин Иван Иванович"/>
+    <Transactions
+        id = "15"
+        productId = "2"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-01 13:23:42"
+        sender = "Степанов Иван Иванович"
+        recipient= "6"/>
+    <Transactions
+        id = "16"
+        productId = "8"
+        quantity = "50"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-01 13:34:07"
+        sender = "1"
+        recipient= "4"/>
+    <Transactions
+        id = "17"
+        productId = "5"
+        quantity = "20"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-01 13:34:07"
+        sender = "1"
+        recipient = "3"/>
+    <Transactions
+        id = "18"
+        productId = "2"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-02 13:41:25"
+        sender = "Степанов Иван Иванович"
+        recipient = "6"/>
+    <Transactions
+        id = "19"
+        productId = "2"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-02 13:41:41"
+        sender = "Степанов Иван Иванович"
+        recipient = "5"/>
+    <Transactions
+        id = "20"
+        productId = "2"
+        quantity = "100"
+        direction = "receipt"
+        datetime = "2018-09-02 13:43:58"
+        sender = "Степанов Иван Иванович"
+        recipient = "5"/>
+    <Transactions
+        id = "21"
+        productId = "2"
+        quantity = "50"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:47:00"
+        sender = "5"
+        recipient = "6"/>
+    <Transactions
+        id = "22"
+        productId = "2"
+        quantity = "50"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:47:02"
+        sender = "5"
+        recipient = "6"/>
+    <Transactions
+        id = "23"
+        productId = "2"
+        quantity = "150"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:47:09"
+        sender = "5"
+        recipient = "6"/>
+    <Transactions
+        id = "24"
+        productId = "2"
+        quantity = "150"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:48:07"
+        sender = "6"
+        recipient = "5"/>
+    <Transactions
+        id = "25"
+        productId = "2"
+        quantity = "200"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:48:18"
+        sender = "6"
+        recipient = "5"/>
+    <Transactions
+        id = "26"
+        productId = "2"
+        quantity = "100"
+        direction = "dispatch"
+        datetime = "2018-09-02 13:51:06"
+        sender = "5"
+        recipient = "Олеша Иван Иванович"/>
+    <Transactions
+        id = "27"
+        productId = "8"
+        quantity = "50"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:55:11"
+        sender = "4"
+        recipient = "3"/>
+    <Transactions
+        id = "28"
+        productId = "5"
+        quantity = "20"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:55:55"
+        sender = "3"
+        recipient = "1"/>
+    <Transactions
+        id = "29"
+        productId = "8"
+        quantity = "100"
+        direction = "betweenWarehouses"
+        datetime = "2018-09-02 13:56:41"
+        sender = "2"
+        recipient = "3"/>
+    <Transactions
+        id = "30"
+        productId = "6"
+        quantity = "100"
+        direction= "dispatch"
+        datetime= "2018-09-02 13:57:48"
+        sender= "2"
+        recipient= "Набоков Армэн Георгиевич"/>
+    <Transactions
+        id = "31"
+        productId = "8"
+        quantity = "100"
+        direction= "receipt"
+        datetime= "2018-09-02 14:00:39"
+        sender= "Олдингтон Григорий Булатович"
+        recipient= "1"/>
+    <Transactions
+        id="32"
+        productId="8"
+        quantity="100"
+        direction="receipt"
+        datetime="2018-09-25 15:56:39"
+        sender="Олдингтон Григорий Булатович"
+        recipient="1"/>
+</dataset>

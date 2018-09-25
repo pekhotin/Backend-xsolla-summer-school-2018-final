@@ -120,13 +120,3 @@ CREATE TABLE `mvc`.`Transactions` (
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
-
-CREATE USER 'non-root'@'%' IDENTIFIED BY '12345';
-
-GRANT SELECT, INSERT, DELETE, UPDATE ON `mvc`.`Users` TO 'non-root'@'%';
-GRANT SELECT, INSERT, DELETE, UPDATE ON `mvc`.`Products` TO 'non-root'@'%';
-GRANT SELECT, INSERT, DELETE, UPDATE ON `mvc`.`Warehouses` TO 'non-root'@'%';
-GRANT SELECT, INSERT, DELETE ON `mvc`.`Transactions` TO 'non-root'@'%';
-GRANT SELECT, INSERT, DELETE ON `mvc`.`State` TO 'non-root'@'%';
-
-FLUSH PRIVILEGES;

@@ -1,7 +1,6 @@
 <?php
 
 use \Psr\Container\ContainerInterface;
-
 use \App\Controller\{
 	ProductController,
     WarehouseController,
@@ -37,7 +36,6 @@ $container['errorHandler'] = function (ContainerInterface $c) {
 
 $app->add(AuthenticationFactory::getAuthentication());
 
-//users
 $container['user.controller'] = function (ContainerInterface $c) use ($app) {
     return new UserController($app, $c->get('user.service'));
 };
@@ -48,7 +46,6 @@ $container['user.repository'] = function (ContainerInterface $c) use ($app) {
     return new UserRepository($c->get('db.config'));
 };
 
-//state
 $container['state.service'] = function (ContainerInterface $c) use ($app) {
     return new StateService($c->get('state.repository'));
 };
@@ -56,7 +53,6 @@ $container['state.repository'] = function (ContainerInterface $c) use ($app) {
     return new StateRepository($c->get('db.config'));
 };
 
-//products
 $container['product.controller'] = function (ContainerInterface $c) use ($app) {
     return new ProductController(
         $app,
@@ -73,7 +69,6 @@ $container['product.repository'] = function (ContainerInterface $c) use ($app) {
     return new ProductRepository($c->get('db.config'));
 };
 
-//transaction
 $container['transaction.service'] = function (ContainerInterface $c) use ($app) {
     return new TransactionService($c->get('transaction.repository'));
 };
@@ -81,7 +76,6 @@ $container['transaction.repository'] = function (ContainerInterface $c) use ($ap
     return new TransactionRepository($c->get('db.config'));
 };
 
-//warehouses
 $container['warehouse.controller'] = function (ContainerInterface $c) use ($app) {
     return new WarehouseController(
         $app,

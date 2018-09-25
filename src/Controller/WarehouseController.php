@@ -267,7 +267,6 @@ class WarehouseController extends BaseController
 
         return $response->withJson($transactionsArray, 201);
     }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -358,7 +357,7 @@ class WarehouseController extends BaseController
 
             $newWarehouse = $this->warehouseService->getOne($values['warehouseId'], $this->user);
 
-            $product = $this->productService->getOneBySku($values, $this->user);
+            $product = $this->productService->getOneBySku($values['sku'], $this->user);
             if ($product === null) {
                 throw new \LogicException(
                     "product with sku {$values['sku']} not found!",

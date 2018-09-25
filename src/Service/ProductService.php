@@ -5,14 +5,13 @@ namespace App\Service;
 use App\Repository\ProductRepository;
 use App\Model\Product;
 use App\Model\User;
+
 class ProductService
 {
-
     /**
      * @var ProductRepository
      */
     private $productRepository;
-
     /**
      * ProductService constructor.
      * 
@@ -29,17 +28,7 @@ class ProductService
      */
     public function getAll(User $user)
     {
-        return $this->productRepository->getAll($user);
-    }
-    /**
-     * @param int $id
-     * @param User $user
-     *
-     * @return Product|null
-     */
-    public function getOneById(int $id, User $user)
-    {
-        return $this->productRepository->findById($id, $user);
+        return $this->productRepository->getAll($user->getId());
     }
     /**
      * @param int $sku
@@ -49,19 +38,22 @@ class ProductService
      */
     public function getOneBySku(int $sku, User $user)
     {
-        return $this->productRepository->findBySku($sku, $user);
+        return $this->productRepository->findBySku($sku, $user->getId());
     }
     /**
      * @param Product $product
      * @param User $user
+     *
+     * @return Product
      */
     public function add(Product $product, User $user)
     {
-        return $this->productRepository->insert($product, $user);
+        return $this->productRepository->insert($product, $user->getId());
     }
-
     /**
      * @param int $productId
+     *
+     * @return null
      *
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
@@ -69,7 +61,6 @@ class ProductService
     {
         return $this->productRepository->delete($productId);
     }
-
     /**
      * @param Product $product
      *

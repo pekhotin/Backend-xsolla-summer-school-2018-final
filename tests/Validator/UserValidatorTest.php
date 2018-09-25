@@ -5,15 +5,21 @@ namespace Tests\Validator;
 use App\Model\User;
 use App\Validator\UserValidator;
 use JsonSchema\Exception\ValidationException;
-use Tests\XmlTestCase;
+use PHPUnit\Framework\TestCase;
 
-class UserValidatorTest extends XmlTestCase
+class UserValidatorTest extends TestCase
 {
-
     /**
      * @var User
      */
     protected $user;
+
+    protected $fixture;
+
+    protected function tearDown()
+    {
+        $this->fixture = null;
+    }
 
     protected function setUp()
     {

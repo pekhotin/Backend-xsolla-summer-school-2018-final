@@ -11,7 +11,6 @@ class UserService
      * @var UserRepository
      */
     private $userRepository;
-
     /**
      * UserServiceTest constructor.
      *
@@ -21,7 +20,6 @@ class UserService
     {
         $this->userRepository = $userRepository;
     }
-
     /**
      * @param User $user
      *
@@ -79,6 +77,6 @@ class UserService
      */
     public function delete(User $user)
     {
-        $this->userRepository->delete($user);
+        $this->userRepository->delete($user->getId());
     }
 }

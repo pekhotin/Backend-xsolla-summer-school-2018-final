@@ -2,22 +2,21 @@
 
 namespace App\Repository;
 
-use App\Model\User;
 use App\Model\Warehouse;
 
 class WarehouseRepository extends AbstractRepository
 {
     /**
      * @param int $id
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse|null
      */
-    public function findById($id, $user)
+    public function findById($id, $userId)
     {
         $row = $this->dbConnection->fetchAssoc(
             'SELECT * FROM Warehouses WHERE id = ? AND userId = ?',
-            [$id, $user->getId()]
+            [$id, $userId]
         );
 
         if ($row === false) {
@@ -34,17 +33,17 @@ class WarehouseRepository extends AbstractRepository
     }
     /**
      * @param string $address
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse|null
      */
-    public function findByAddress($address, $user)
+    public function findByAddress($address, $userId)
     {
         $row = $this->dbConnection->fetchAssoc(
             'SELECT * FROM Warehouses WHERE address = ? AND userId = ?',
             [
                 $address,
-                $user->getId()
+                $userId
             ]
         );
 
@@ -61,26 +60,15 @@ class WarehouseRepository extends AbstractRepository
     }
     /**
      * @param Warehouse $warehouse
-     *
-     * @return int
+     * @param int $userId
+     * @return Warehouse
      */
-    public function getWarehouseCountById(Warehouse $warehouse)
-    {
-        return (int)$this->dbConnection->fetchColumn(
-            'SELECT count(id) FROM ' . $this->tableName . ' WHERE id = ?',
-            [$warehouse->getId()]
-        );
-    }
-    /**
-     * @param Warehouse $warehouse
-     * @param User $user
-     */
-    public function insert($warehouse, $user)
+    public function insert($warehouse, $userId)
     {
         $values = [
             'address' => $warehouse->getAddress(),
             'capacity' => $warehouse->getCapacity(),
-            'userId' => $user->getId()
+            'userId' => $userId
         ];
 
         $this->dbConnection->insert(
@@ -89,9 +77,12 @@ class WarehouseRepository extends AbstractRepository
         );
 
         $warehouse->setId((int)$this->dbConnection->lastInsertId());
+        return $warehouse;
     }
     /**
      * @param int $warehouseId
+     *
+     * @return null
      *
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
@@ -101,46 +92,39 @@ class WarehouseRepository extends AbstractRepository
             'Warehouses',
             ['id' => $warehouseId]
         );
+        return null;
     }
     /**
      * @param Warehouse $warehouse
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse|null
      */
-    public function update($warehouse, $user)
+    public function update($warehouse, $userId)
     {
-        $values = [];
-
-        if ($warehouse->getAddress() !== null) {
-            $values['address'] =  $warehouse->getAddress();
-        }
-
-        if ($warehouse->getCapacity() !== null) {
-            $values['capacity'] = $warehouse->getCapacity();
-        }
-
         $this->dbConnection->update(
             'Warehouses',
-            $values,
             [
-                'id' => $warehouse->getId(),
-                'userId' => $user->getId()
+                'address' => $warehouse->getAddress(),
+                'capacity' => $warehouse->getCapacity()
+            ],
+            [
+                'id' => $warehouse->getId()
             ]
         );
 
-        return $this->findById($warehouse->getId(), $user);
+        return $this->findById($warehouse->getId(), $userId);
     }
     /**
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse[]
      */
-    public function getAll($user)
+    public function getAll($userId)
     {
         $rows = $this->dbConnection->fetchAll(
             'SELECT * FROM Warehouses WHERE userId = ?',
-            [$user->getId()]
+            [$userId]
         );
 
         $warehouses = [];

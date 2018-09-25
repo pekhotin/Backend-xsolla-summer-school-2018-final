@@ -5,14 +5,21 @@ namespace Tests\Validator;
 use App\Model\Product;
 use App\Validator\ProductValidator;
 use JsonSchema\Exception\ValidationException;
-use Tests\XmlTestCase;
+use PHPUnit\Framework\TestCase;
 
-class ProductValidatorTest extends XmlTestCase
+class ProductValidatorTest extends TestCase
 {
     /**
      * @var Product
      */
     protected $product;
+
+    protected $fixture;
+
+    protected function tearDown()
+    {
+        $this->fixture = null;
+    }
 
     protected function setUp()
     {

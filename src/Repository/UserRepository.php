@@ -3,8 +3,6 @@
 namespace App\Repository;
 
 use App\Model\User;
-use Doctrine\DBAL\Connection;
-use phpDocumentor\Reflection\Types\This;
 
 class UserRepository extends AbstractRepository
 {
@@ -39,7 +37,6 @@ class UserRepository extends AbstractRepository
             (string)$row['phoneNumber']
         );
     }
-
     /**
      * @param string $email
      * @param int $userId
@@ -68,12 +65,12 @@ class UserRepository extends AbstractRepository
             (string)$row['phoneNumber']
         );
     }
-
     /**
      * @param string $name
      * @param string $surname
      * @param string $organization
      * @param int $userId
+     *
      * @return User|null
      */
     public function findByNameAndOrg($name, $surname, $organization, $userId = 0)
@@ -103,7 +100,6 @@ class UserRepository extends AbstractRepository
             (string)$row['phoneNumber']
         );
     }
-
     /**
      * @param User $user
      *
@@ -127,6 +123,7 @@ class UserRepository extends AbstractRepository
         );
 
         $user->setId((int)$this->dbConnection->lastInsertId());
+
         return $user;
     }
     /**
@@ -145,18 +142,21 @@ class UserRepository extends AbstractRepository
 
         return $this->findById($user->getId());
     }
-
     /**
-     * @param User $user
+     * @param int $userId
+     *
+     * @return null
      *
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function delete($user)
+    public function delete($userId)
     {
         $this->dbConnection->delete(
             'Users',
-            ['id' => $user->getId()]
+            ['id' => $userId]
         );
+
+        return null;
     }
     /**
      * @param int $userId

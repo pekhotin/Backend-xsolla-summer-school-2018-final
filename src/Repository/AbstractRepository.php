@@ -10,7 +10,6 @@ class AbstractRepository
      * @var Connection
      */
     protected $dbConnection;
-
     /**
      * AbstractRepository constructor.
      *

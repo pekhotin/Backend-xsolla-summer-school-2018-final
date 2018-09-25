@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use App\Model\User;
+use App\Service\ConnectionFactory;
 use Doctrine\DBAL\Driver\PDOConnection;
 use PHPUnit\DbUnit\Database\Connection;
 use PHPUnit\DbUnit\TestCaseTrait;
@@ -11,33 +11,18 @@ use PHPUnit\Framework\TestCase;
 abstract class AbstractDatabaseTestCase extends TestCase
 {
     use TestCaseTrait;
-    /**
-     * @var mixed
-     */
-    protected $fixture;
-    /**
-     * @var PDOConnection
-     */
+
     static private $pdo = null;
-    /**
-     * @var Connection
-     */
+
+    protected $dbal = null;
+
     private $conn = null;
 
-    protected function setUp()
-    {
-
-    }
-
-    protected function tearDown()
-    {
-        $this->fixture = null;
-    }
-
     /**
-     * @return Connection|\PHPUnit\DbUnit\Database\DefaultConnection
+     * @return null|\PHPUnit\DbUnit\Database\DefaultConnection
+     * @expectedException \Doctrine\DBAL\DBALException
      */
-    final public function getConnection()
+    public function getConnection()
     {
         if ($this->conn === null) {
             $configParams = require __DIR__ . '/../config/config.php';
@@ -48,14 +33,16 @@ abstract class AbstractDatabaseTestCase extends TestCase
                     $configParams['password']
                 );
             }
-            $query = file_get_contents(__DIR__ . '/../resources/script.sql');
+            $query = file_get_contents(__DIR__ . '/../resources/mvc.sql');
             self::$pdo->query($query);
             $this->conn = $this->createDefaultDBConnection(
                 self::$pdo,
                 $configParams['dbname']
             );
         }
-
+        if ($this->dbal === null) {
+            $this->dbal = ConnectionFactory::getConnection();
+        }
         return $this->conn;
     }
 }

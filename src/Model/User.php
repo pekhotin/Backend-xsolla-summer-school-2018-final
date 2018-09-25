@@ -177,7 +177,6 @@ class User
     public function getUserArray()
     {
         return [
-            'id' => $this->id,
             'login' => $this->login,
             'name' => $this->name,
             'surname' => $this->surname,

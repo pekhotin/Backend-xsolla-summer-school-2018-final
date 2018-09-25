@@ -3,21 +3,20 @@
 namespace App\Repository;
 
 use App\Model\Product;
-use App\Model\User;
 
 class ProductRepository extends AbstractRepository
 {
     /**
      * @param int $sku
-     * @param User $user
+     * @param int $userId
      *
      * @return Product|null
      */
-    public function findBySku($sku, $user)
+    public function findBySku($sku, $userId)
     {
         $row = $this->dbConnection->fetchAssoc(
             'SELECT * FROM Products WHERE sku = ? AND userId = ?',
-            [$sku, $user->getId()]
+            [$sku, $userId]
         );
 
         if ($row === false) {
@@ -58,15 +57,16 @@ class ProductRepository extends AbstractRepository
             (string)$row['type']
         );
     }
-
     /**
      * @param Product $product
-     * @param User $user
+     * @param int $userId
+     *
+     * @return Product
      */
-    public function insert($product, $user)
+    public function insert($product, $userId)
     {
         $values = $product->getProductArray();
-        $values['userId'] = $user->getId();
+        $values['userId'] = $userId;
 
         $this->dbConnection->insert(
             'Products',
@@ -74,11 +74,14 @@ class ProductRepository extends AbstractRepository
         );
 
         $product->setId((int)$this->dbConnection->lastInsertId());
+        return $product;
     }
     /**
      * @param int $productId
      *
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
+     *
+     * @return null
      */
     public function delete($productId)
     {
@@ -86,6 +89,8 @@ class ProductRepository extends AbstractRepository
             'Products',
             ['id' => $productId]
         );
+
+        return null;
     }
     /**
      * @param Product $product
@@ -94,30 +99,9 @@ class ProductRepository extends AbstractRepository
      */
     public function update($product)
     {
-        $values = [];
-
-        if ($product->getSku() !== null) {
-            $values['sku'] = $product->getSku();
-        }
-        if ($product->getName() !== null) {
-            $values['name'] = $product->getName();
-        }
-
-        if ($product->getPrice() !== null) {
-            $values['price'] = $product->getPrice();
-        }
-
-        if ($product->getSize() !== null) {
-            $values['size'] = $product->getSize();
-        }
-
-        if ($product->getType() !== null) {
-            $values['type'] = $product->getType();
-        }
-
         $this->dbConnection->update(
             'Products',
-            $values,
+            $product->getProductArray(),
             [
                 'id' => $product->getId()
             ]
@@ -126,15 +110,15 @@ class ProductRepository extends AbstractRepository
         return $this->findById($product->getId());
     }
     /**
-     * @param User $user
+     * @param int $userId
      *
      * @return Product[]
      */
-    public function getAll($user)
+    public function getAll($userId)
     {
         $rows = $this->dbConnection->fetchAll(
             'SELECT * FROM Products WHERE userId = ?',
-            [$user->getId()]
+            [$userId]
         );
 
         $products = [];

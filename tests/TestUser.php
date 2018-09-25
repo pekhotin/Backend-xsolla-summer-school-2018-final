@@ -2,17 +2,14 @@
 
 namespace Tests;
 
-
 class TestUser extends XmlTestCase
 {
-    //здесь надо делать функциональные тесты
     public function testUsers()
     {
-        $sql = "SELECT * FROM `mvc`.`Users`";
+        $sql = "SELECT * FROM Transactions";
         $statement =
             $this->getConnection()->getConnection()->query($sql);
         $result = $statement->fetchAll();
-        $this->assertEquals(2, sizeof($result));
-        //$this->assertEquals('Nalabal', $result[00]['name']);
+        $this->assertEquals(31, sizeof($result));
     }
 }

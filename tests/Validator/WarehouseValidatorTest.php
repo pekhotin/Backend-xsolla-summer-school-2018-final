@@ -2,18 +2,24 @@
 
 namespace Tests\Validator;
 
-
 use App\Model\Warehouse;
 use App\Validator\WarehouseValidator;
 use JsonSchema\Exception\ValidationException;
-use Tests\XmlTestCase;
+use PHPUnit\Framework\TestCase;
 
-class WarehouseValidatorTest extends XmlTestCase
+class WarehouseValidatorTest extends TestCase
 {
     /**
      * @var Warehouse
      */
     protected $warehouse;
+
+    protected $fixture;
+
+    protected function tearDown()
+    {
+        $this->fixture = null;
+    }
 
     protected function setUp()
     {

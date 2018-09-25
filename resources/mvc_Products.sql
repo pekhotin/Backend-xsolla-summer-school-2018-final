@@ -1,0 +1,11 @@
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (1, 5555, 'Куриное филе охлажденное', 250, 3, 'food', 1);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (2, 5555, 'Куриное филе охлажденное', 230, 3, 'food', 2);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (3, 125, 'Морковь свежая', 50, 5, 'food', 1);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (4, 115, 'Шампунь Xеден шолдерс', 150, 1, 'household', 1);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (5, 114, 'Тапки резиновые с дырками', 200, 5, 'household', 1);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (6, 2145, 'Термос для еды с контейнерами', 650, 3, 'household', 1);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (7, 114, 'Тапки резиновые с дырками', 250, 5, 'household', 2);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (8, 785, 'Молоко 3,2% 1 литр', 50, 3, 'food', 1);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (9, 111, 'Арабская поэзия средних веков', 350, 1, 'book', 2);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (10, 5439, 'Героический эпос народов СССР', 350, 1, 'book', 2);
+INSERT INTO mvc.Products (id, sku, name, price, size, type, userId) VALUES (11, 65629, 'Помидоры Абакан', 70, 5, 'food', 1);
