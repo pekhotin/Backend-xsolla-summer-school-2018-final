@@ -83,7 +83,7 @@ class StateService
      */
     public function getResiduesByWarehouseForDate($warehouseId, $date)
     {
-        return $this->stateRepository->getResiduesByWarehouseForDate($warehouseId, $date);
+        return $this->stateRepository->getResiduesByWarehouse($warehouseId, $date);
     }
     /**
      * @param int $productId
@@ -102,7 +102,7 @@ class StateService
      */
     public function getResiduesByProductForDate($productId, $date)
     {
-        return $this->stateRepository->getResiduesByProductForDate($productId, $date);
+        return $this->stateRepository->getResiduesByProduct($productId, $date);
     }
 }
 

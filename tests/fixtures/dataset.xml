@@ -270,7 +270,7 @@
         warehouseId = "1"
         productId = "8"
         quantity = "250"
-        date = "2018-09-25"/>
+        date = "2018-09-26"/>
     <Transactions
         id = "1"
         productId = "4"
@@ -524,7 +524,7 @@
         productId="8"
         quantity="100"
         direction="receipt"
-        datetime="2018-09-25 15:56:39"
+        datetime="2018-09-26 15:56:39"
         sender="Олдингтон Григорий Булатович"
         recipient="1"/>
 </dataset>

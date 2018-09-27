@@ -55,8 +55,10 @@ class StateRepository extends AbstractRepository
      * @param int $warehouseId
      * @param int $productId
      * @param int $quantity
+     *
+     * @return array
      */
-    public function update($warehouseId, $productId, $quantity)
+    private function update($warehouseId, $productId, $quantity)
     {
         $this->dbConnection->update(
             'State',
@@ -72,8 +74,10 @@ class StateRepository extends AbstractRepository
      * @param int $warehouseId
      * @param int $productId
      * @param int $quantity
+     *
+     * @return array
      */
-    public function insert($warehouseId, $productId, $quantity)
+    private function insert($warehouseId, $productId, $quantity)
     {
         $this->dbConnection->insert(
             'State',
@@ -112,13 +116,13 @@ class StateRepository extends AbstractRepository
                 }
                 if ($this->getFreePlace($warehouseId) < 0) {
                     throw new \LogicException(
-                        "not enough space on warehouse with id {$warehouseId}!",
+                        "Not enough space on warehouse with id {$warehouseId}.",
                         400
                     );
                 }
             }
             $this->dbConnection->commit();
-        } catch (\Exception $e) {
+        } catch (\LogicException $e) {
             $this->dbConnection->rollBack();
             throw $e;
         }
@@ -150,7 +154,7 @@ class StateRepository extends AbstractRepository
 
                 if ($this->getLastQuantity($warehouseId, $productId) < 0) {
                     throw new \LogicException(
-                        "not enough product with sku {$transaction->getProduct()->getSku()} in warehouse!",
+                        "Not enough product with sku {$transaction->getProduct()->getSku()} in warehouse with id {$warehouseId}.",
                         400
                     );
                 }
@@ -174,7 +178,7 @@ class StateRepository extends AbstractRepository
             $this->removeProducts($transactions);
             $this->addProducts($transactions);
             $this->dbConnection->commit();
-        } catch (\Exception $e) {
+        } catch (\LogicException $e) {
             $this->dbConnection->rollBack();
             throw $e;
         }
@@ -233,75 +237,15 @@ class StateRepository extends AbstractRepository
     }
     /**
      * @param int $warehouseId
-     *
-     * @return array
-     */
-    public function getResiduesByWarehouse($warehouseId)
-    {
-        $rows = $this->dbConnection->fetchAll(
-            'SELECT p.name, p.sku, s1.quantity, p.price
-            FROM State AS s1
-            JOIN Products AS p ON p.id = s1.productId
-            WHERE warehouseId = ? AND s1.quantity > 0 AND date = (
-              SELECT MAX(s2.date)
-              FROM State AS s2
-              WHERE s1.productId = s2.productId AND warehouseId = ? 
-            )',
-            [
-                $warehouseId,
-                $warehouseId
-            ]
-        );
-
-        $residues = [];
-
-        foreach ($rows as $row) {
-            $residues[] = [
-                'sku' => (int)$row['sku'],
-                'quantity' => (int)$row['quantity'],
-                'cost' => (float)$row['price'] * (float)$row['quantity']
-            ];
-        }
-        return $residues;
-    }
-    /**
-     * @param int $productId
-     *
-     * @return array
-     */
-    public function getResiduesByProduct($productId)
-    {
-        $rows = $this->dbConnection->fetchAll(
-            'SELECT s1.warehouseId, s1.quantity, p.price
-            FROM State AS s1
-            JOIN Products AS p ON p.id = s1.productId
-            WHERE s1.productId = ? AND s1.quantity > 0 AND date = (
-              SELECT MAX(s2.date)
-              FROM State AS s2
-              WHERE s1.productId = s2.productId 
-            )',
-            [$productId]
-        );
-
-        $residues = [];
-
-        foreach ($rows as $row) {
-            $residues[] = [
-                'warehouseId' => (int)$row['warehouseId'],
-                'quantity' => (int)$row['quantity'],
-                'cost' => (float)$row['price'] * (float)$row['quantity']
-            ];
-        }
-        return $residues;
-    }
-    /**
-     * @param int $warehouseId
      * @param string $date
      *
      * @return array
      */
-    public function getResiduesByWarehouseForDate($warehouseId, $date)
+    public function getResiduesByWarehouse($warehouseId, $date = null)
     {
+        if ($date === null) {
+            $date = date('Y-m-d');
+        }
         $rows = $this->dbConnection->fetchAll(
             'SELECT p.name, p.sku, s1.quantity, p.price
             FROM State AS s1
@@ -310,7 +254,8 @@ class StateRepository extends AbstractRepository
               SELECT MAX(s2.date)
               FROM State AS s2
               WHERE s1.productId = s2.productId AND s2.warehouseId = ? AND s2.date <= ?
-            )',
+            )
+            ORDER BY s1.warehouseId',
             [
                 $warehouseId,
                 $warehouseId,
@@ -335,8 +280,11 @@ class StateRepository extends AbstractRepository
      *
      * @return array
      */
-    public function getResiduesByProductForDate($productId, $date)
+    public function getResiduesByProduct($productId, $date = null)
     {
+        if ($date === null) {
+            $date = date('Y-m-d');
+        }
         $rows = $this->dbConnection->fetchAll(
             'SELECT s1.warehouseId, s1.quantity, p.price
             FROM State AS s1
@@ -344,14 +292,14 @@ class StateRepository extends AbstractRepository
             WHERE s1.productId = ? AND s1.quantity > 0 AND date = (
               SELECT MAX(s2.date)
               FROM State AS s2
-              WHERE s1.productId = s2.productId AND s2.date <= ?
-            )',
+              WHERE s1.productId = s2.productId AND s1.warehouseId = s2.warehouseId AND s2.date <= ?
+            )
+            ORDER BY s1.warehouseId',
             [
                 $productId,
                 $date
             ]
         );
-
         $residues = [];
 
         foreach ($rows as $row) {

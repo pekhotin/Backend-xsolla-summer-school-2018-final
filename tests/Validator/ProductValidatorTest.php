@@ -383,7 +383,6 @@ class ProductValidatorTest extends TestCase
             'size' => 5,
             'type' => 'food'
         ];
-
         //correct sku
         $values = $template;
         $values['sku'] = 758;
@@ -393,7 +392,6 @@ class ProductValidatorTest extends TestCase
             ],
             $values
         ];
-
         //correct sku, name
         $values = $template;
         $values['sku'] = 235;
@@ -405,7 +403,6 @@ class ProductValidatorTest extends TestCase
             ],
             $values
         ];
-
         //string sku
         $result[] = [
             [
@@ -459,7 +456,6 @@ class ProductValidatorTest extends TestCase
                 ]
             ]
         ];
-
         //long sku
         $result[] = [
             [
@@ -473,7 +469,6 @@ class ProductValidatorTest extends TestCase
                 ]
             ]
         ];
-
         //empty name
         $result[] = [
             [
@@ -487,7 +482,6 @@ class ProductValidatorTest extends TestCase
                 ]
             ]
         ];
-
         //numerical name
         $result[] = [
             [
