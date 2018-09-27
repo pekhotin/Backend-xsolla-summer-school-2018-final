@@ -226,6 +226,7 @@ class StateRepository extends AbstractRepository
         if ($row === false) {
             return null;
         }
+
         $freePlace = (int)$row['capacity'] - $this->getFilling($warehouseId);
 
         return $freePlace;
