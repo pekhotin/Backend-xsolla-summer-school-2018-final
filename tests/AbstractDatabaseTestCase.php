@@ -4,7 +4,6 @@ namespace Tests;
 
 use App\Service\ConnectionFactory;
 use Doctrine\DBAL\Driver\PDOConnection;
-use PHPUnit\DbUnit\Database\Connection;
 use PHPUnit\DbUnit\TestCaseTrait;
 use PHPUnit\Framework\TestCase;
 

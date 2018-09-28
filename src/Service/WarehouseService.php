@@ -31,23 +31,23 @@ class WarehouseService
     }
     /**
      * @param int $id
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse|null
      */
-    public function getOne($id, User $user)
+    public function getOne($id, int $userId)
     {
-        return $this->warehouseRepository->findById($id, $user->getId());
+        return $this->warehouseRepository->findById($id, $userId);
     }
     /**
      * @param string $address
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse|null
      */
-    public function getOneByAddress(string $address, User $user)
+    public function getOneByAddress(string $address, $userId)
     {
-        return $this->warehouseRepository->findByAddress($address, $user->getId());
+        return $this->warehouseRepository->findByAddress($address, $userId);
     }
     /**
      * @param Warehouse $warehouse

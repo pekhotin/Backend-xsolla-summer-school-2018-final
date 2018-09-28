@@ -29,4 +29,4 @@ INSERT INTO mvc.Transactions (id, productId, quantity, direction, datetime, send
 INSERT INTO mvc.Transactions (id, productId, quantity, direction, datetime, sender, recipient) VALUES (29, 8, 100, 'betweenWarehouses', '2018-09-02 13:56:41', '2', '3');
 INSERT INTO mvc.Transactions (id, productId, quantity, direction, datetime, sender, recipient) VALUES (30, 6, 100, 'dispatch', '2018-09-02 13:57:48', '2', 'Набоков Армэн Георгиевич');
 INSERT INTO mvc.Transactions (id, productId, quantity, direction, datetime, sender, recipient) VALUES (31, 8, 100, 'receipt', '2018-09-02 14:00:39', 'Олдингтон Григорий Булатович', '1');
-INSERT INTO mvc.Transactions (id, productId, quantity, direction, datetime, sender, recipient) VALUES (32, 8, 100, 'receipt', '2018-09-25 15:56:39', 'Олдингтон Григорий Булатович', '1');
+INSERT INTO mvc.Transactions (id, productId, quantity, direction, datetime, sender, recipient) VALUES (32, 8, 100, 'receipt', '2018-09-28 15:56:39', 'Олдингтон Григорий Булатович', '1');

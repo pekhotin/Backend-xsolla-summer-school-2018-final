@@ -69,9 +69,9 @@ class WarehouseController extends BaseController
         $bodyParams = $request->getParsedBody();
         $values = $this->validator->validateInsertData($bodyParams);
 
-        if ($this->warehouseService->getOneByAddress($values['address'], $this->user) !== null) {
+        if ($this->warehouseService->getOneByAddress($values['address'], $this->user->getId()) !== null) {
             throw new \LogicException(
-                "warehouse with address {$values['address']} already exists!",
+                "warehouse with address {$values['address']} already exists.",
                 400
             );
         }
@@ -99,27 +99,29 @@ class WarehouseController extends BaseController
         $bodyParams = $request->getParsedBody();
         $id = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
-        $warehouse = $this->warehouseService->getOne($id, $this->user);
+        $warehouse = $this->warehouseService->getOne($id, $this->user->getId());
 
         if ($warehouse === null) {
             throw new \LogicException(
-                "warehouse with id {$id} not found!",
+                "warehouse with id {$id} not found.",
                 404
             );
         }
 
         $values = $this->validator->validateUpdateData($warehouse, $bodyParams);
 
-        if ($this->warehouseService->getOneByAddress($values['address'], $this->user) !== null) {
-            throw new \LogicException(
-                "warehouse with address {$values['address']} already exists!",
-                400
-            );
+        if (isset($bodyParams['address'])) {
+            if ($this->warehouseService->getOneByAddress($values['address'], $this->user->getId()) !== null) {
+                throw new \LogicException(
+                    "warehouse with address {$values['address']} already exists.",
+                    400
+                );
+            }
         }
 
         if ($this->stateService->getFilling($id) > $values['capacity']) {
             throw new \LogicException(
-                'new capacity can not be less than filling!',
+                'new capacity can not be less than filling.',
                 400
             );
         }
@@ -148,15 +150,15 @@ class WarehouseController extends BaseController
         $this->initUser($request);
         $id = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
-        if ($this->warehouseService->getOne($id, $this->user) === null) {
+        if ($this->warehouseService->getOne($id, $this->user->getId()) === null) {
             throw new \LogicException(
-                "warehouse with id {$id} not found!",
+                "warehouse with id {$id} not found.",
                 404
             );
         }
         if ($this->transactionService->getMovementsByWarehouse($id) !== null) {
             throw new \LogicException(
-                "warehouse with id {$id} already participated in the movement!",
+                "warehouse with id {$id} already participated in the movements.",
                 400
             );
         }
@@ -178,11 +180,11 @@ class WarehouseController extends BaseController
     {
         $this->initUser($request);
         $id = $this->validator->validateVar(trim($args['id']), 'int', 'id');
-        $warehouse = $this->warehouseService->getOne($id, $this->user);
+        $warehouse = $this->warehouseService->getOne($id, $this->user->getId());
 
         if($warehouse === null) {
             throw new \LogicException(
-                "warehouse with id {$id} not found!",
+                "warehouse with id {$id} not found.",
                 404
             );
         }
@@ -224,11 +226,11 @@ class WarehouseController extends BaseController
         $transactions = [];
         $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'warehouseId');
 
-        $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
+        $warehouse = $this->warehouseService->getOne($warehouseId, $this->user->getId());
 
         if ($warehouse === null) {
             throw new \LogicException(
-                "warehouse with id {$warehouseId} not found!",
+                "warehouse with id {$warehouseId} not found.",
                 404
             );
         }
@@ -236,11 +238,11 @@ class WarehouseController extends BaseController
         foreach ($bodyParams as $param) {
 
             $values = $this->validator->receiptProductsData($param);
-            $product = $this->productService->getOneBySku($values['sku'], $this->user);
+            $product = $this->productService->getOneBySku($values['sku'], $this->user->getId());
 
             if ($product === null) {
                 throw new \LogicException(
-                    "product with sku {$values['sku']} not found!",
+                    "product with sku {$values['sku']} not found.",
                     400
                 );
             }
@@ -284,11 +286,11 @@ class WarehouseController extends BaseController
         $bodyParams = $request->getParsedBody();
         $transactions = [];
         $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'warehouseId');
-        $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
+        $warehouse = $this->warehouseService->getOne($warehouseId, $this->user->getId());
 
         if ($warehouse === null) {
             throw new \LogicException(
-                "warehouse with id {$warehouseId} not found!",
+                "warehouse with id {$warehouseId} not found.",
                 404
             );
         }
@@ -296,7 +298,7 @@ class WarehouseController extends BaseController
         foreach ($bodyParams as $param) {
 
             $values = $this->validator->dispatchProductsData($param);
-            $product = $this->productService->getOneBySku($values['sku'], $this->user);
+            $product = $this->productService->getOneBySku($values['sku'], $this->user->getId());
 
             if ($product === null) {
                 throw new \LogicException(
@@ -343,7 +345,7 @@ class WarehouseController extends BaseController
         $bodyParams = $request->getParsedBody();
         $transactions = [];
         $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'warehouseId');
-        $warehouse = $this->warehouseService->getOne($warehouseId, $this->user);
+        $warehouse = $this->warehouseService->getOne($warehouseId, $this->user->getId());
 
         if ($warehouse === null) {
             throw new \LogicException(
@@ -355,9 +357,9 @@ class WarehouseController extends BaseController
         foreach ($bodyParams as $param) {
             $values = $this->validator->movementProductsData($param);
 
-            $newWarehouse = $this->warehouseService->getOne($values['warehouseId'], $this->user);
+            $newWarehouse = $this->warehouseService->getOne($values['warehouseId'], $this->user->getId());
 
-            $product = $this->productService->getOneBySku($values['sku'], $this->user);
+            $product = $this->productService->getOneBySku($values['sku'], $this->user->getId());
             if ($product === null) {
                 throw new \LogicException(
                     "product with sku {$values['sku']} not found!",
@@ -366,7 +368,7 @@ class WarehouseController extends BaseController
             }
             if ($newWarehouse === null) {
                 throw new \LogicException(
-                    "warehouse with id {$values['warehouseId']} not found!",
+                    "warehouse with id {$values['warehouseId']} not found.",
                     400
                 );
             }
@@ -404,9 +406,9 @@ class WarehouseController extends BaseController
         $this->initUser($request);
         $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
-        if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+        if ($this->warehouseService->getOne($warehouseId, $this->user->getId()) === null) {
             throw new \LogicException(
-                "warehouse with id {$warehouseId} not found!",
+                "warehouse with id {$warehouseId} not found.",
                 404
             );
         }
@@ -428,9 +430,9 @@ class WarehouseController extends BaseController
         $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'id');
         $date = $this->validator->validateVar(trim($args['date']), 'date', 'date');
 
-        if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+        if ($this->warehouseService->getOne($warehouseId, $this->user->getId()) === null) {
             throw new \LogicException(
-                "warehouse with id {$warehouseId} not found!",
+                "warehouse with id {$warehouseId} not found.",
                 404
             );
         }
@@ -451,7 +453,7 @@ class WarehouseController extends BaseController
         $this->initUser($request);
         $warehouseId = $this->validator->validateVar(trim($args['id']), 'int', 'id');
 
-        if ($this->warehouseService->getOne($warehouseId, $this->user) === null) {
+        if ($this->warehouseService->getOne($warehouseId, $this->user->getId()) === null) {
             throw new \LogicException(
                 "product with id {$warehouseId} not found!",
                 404

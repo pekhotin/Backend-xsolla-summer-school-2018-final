@@ -18,4 +18,4 @@ INSERT INTO mvc.State (id, warehouseId, productId, quantity, date) VALUES (17, 1
 INSERT INTO mvc.State (id, warehouseId, productId, quantity, date) VALUES (18, 2, 8, 100, '2018-09-02');
 INSERT INTO mvc.State (id, warehouseId, productId, quantity, date) VALUES (19, 2, 6, 0, '2018-09-02');
 INSERT INTO mvc.State (id, warehouseId, productId, quantity, date) VALUES (20, 1, 8, 150, '2018-09-02');
-INSERT INTO mvc.State (id, warehouseId, productId, quantity, date) VALUES (21, 1, 8, 250, '2018-09-26');
+INSERT INTO mvc.State (id, warehouseId, productId, quantity, date) VALUES (21, 1, 8, 250, '2018-09-28');

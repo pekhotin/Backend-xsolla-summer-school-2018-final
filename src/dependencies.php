@@ -26,14 +26,13 @@ use App\Repository\{
 
 $container = $app->getContainer();
 
-$container['db.config'] = function (ContainerInterface $c) {
+$container['dbal'] = function () {
     return ConnectionFactory::getConnection();
 };
 
-$container['errorHandler'] = function (ContainerInterface $c) {
+$container['errorHandler'] = function () {
     return new CustomHandler();
 };
-
 $app->add(AuthenticationFactory::getAuthentication());
 
 $container['user.controller'] = function (ContainerInterface $c) use ($app) {
@@ -43,14 +42,14 @@ $container['user.service'] = function (ContainerInterface $c) use ($app) {
     return new UserService($c->get('user.repository'));
 };
 $container['user.repository'] = function (ContainerInterface $c) use ($app) {
-    return new UserRepository($c->get('db.config'));
+    return new UserRepository($c->get('dbal'));
 };
 
 $container['state.service'] = function (ContainerInterface $c) use ($app) {
     return new StateService($c->get('state.repository'));
 };
 $container['state.repository'] = function (ContainerInterface $c) use ($app) {
-    return new StateRepository($c->get('db.config'));
+    return new StateRepository($c->get('dbal'));
 };
 
 $container['product.controller'] = function (ContainerInterface $c) use ($app) {
@@ -66,14 +65,14 @@ $container['product.service'] = function (ContainerInterface $c) use ($app) {
     return new ProductService($c->get('product.repository'));
 };
 $container['product.repository'] = function (ContainerInterface $c) use ($app) {
-    return new ProductRepository($c->get('db.config'));
+    return new ProductRepository($c->get('dbal'));
 };
 
 $container['transaction.service'] = function (ContainerInterface $c) use ($app) {
     return new TransactionService($c->get('transaction.repository'));
 };
 $container['transaction.repository'] = function (ContainerInterface $c) use ($app) {
-    return new TransactionRepository($c->get('db.config'));
+    return new TransactionRepository($c->get('dbal'));
 };
 
 $container['warehouse.controller'] = function (ContainerInterface $c) use ($app) {
@@ -90,5 +89,5 @@ $container['warehouse.service'] = function (ContainerInterface $c) use ($app) {
     return new WarehouseService($c->get('warehouse.repository'));
 };
 $container['warehouse.repository'] = function (ContainerInterface $c) use ($app) {
-    return new WarehouseRepository($c->get('db.config'));
+    return new WarehouseRepository($c->get('dbal'));
 };

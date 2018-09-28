@@ -5,6 +5,6 @@ return [
     'host' => 'localhost',
     'dbname' => 'mvc',
     'username' => 'root',
-    'password' => '',
+    'password' => 'root',
     'dsn' => 'mysql:host=localhost;charset=UTF8',
 ];

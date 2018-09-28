@@ -27,7 +27,7 @@ class StateService
      */
     public function addProducts($transactions)
     {
-        $this->stateRepository->addProducts($transactions);
+        return $this->stateRepository->addProducts($transactions);
     }
     /**
      * @param Transaction[] $transactions

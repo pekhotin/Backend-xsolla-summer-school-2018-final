@@ -30,15 +30,16 @@ class ProductService
     {
         return $this->productRepository->getAll($user->getId());
     }
+
     /**
      * @param int $sku
-     * @param User $user
+     * @param int $userId
      *
      * @return Product|null
      */
-    public function getOneBySku(int $sku, User $user)
+    public function getOneBySku(int $sku, int $userId)
     {
-        return $this->productRepository->findBySku($sku, $user->getId());
+        return $this->productRepository->findBySku($sku, $userId);
     }
     /**
      * @param Product $product

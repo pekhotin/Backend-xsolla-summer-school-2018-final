@@ -29,18 +29,18 @@ class UserController extends BaseController
 
         if ($this->userService->getOneByNameAndOrg($values['name'], $values['surname'], $values['organization']) !== null) {
             throw new \LogicException(
-                "user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}!",
+                "user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}.",
                 400
             );
         }
         if ($this->userService->getOneByLogin($values['login']) !== null) {
             throw new \LogicException(
-                "user with login {$values['login']} is exist!",
+                "user with login {$values['login']} is exist.",
                 400);
         }
         if ($this->userService->getOneByEmail($values['email']) !== null) {
             throw new \LogicException(
-                "user with email {$values['email']} is exist!",
+                "user with email {$values['email']} is exist.",
                 400);
         }
 
@@ -55,7 +55,7 @@ class UserController extends BaseController
             $values['phoneNumber']
         );
 
-        $this->userService->add($user);
+        $user = $this->userService->add($user);
 
         return $response->withJson($user->getUserArray(), 201);
     }
@@ -68,7 +68,7 @@ class UserController extends BaseController
     public function getMe(Request $request, Response $response)
     {
         $this->initUser($request);
-        return $response->withJson($this->user->getUserArray(), 201);
+        return $response->withJson($this->user->getUserArray(), 200);
     }
     /**
      * @param Request $request
@@ -82,21 +82,25 @@ class UserController extends BaseController
         $bodyParams = $request->getParsedBody();
         $values = $this->validator->validateUpdateData($bodyParams, $this->user);
 
-        if ($this->userService->getOneByNameAndOrg($values['name'], $values['surname'], $values['organization'], $this->user->getId()) !== null) {
+        if ($this->userService->getOneByNameAndOrg(
+            $values['name'],
+            $values['surname'],
+            $values['organization'],
+            $this->user->getId()) !== null) {
             throw new \LogicException(
-                "user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}!",
+                "user {$values['name']} {$values['surname']} is exist in organization {$values['organization']}.",
                 400
             );
         }
         if ($this->userService->getOneByLogin($values['login'], $this->user->getId()) !== null ) {
             throw new \LogicException(
-                "user with login {$values['login']} is exist!",
+                "user with login {$values['login']} is exist.",
                 400
             );
         }
         if ($this->userService->getOneByEmail($values['email'], $this->user->getId()) !== null) {
             throw new \LogicException(
-                "user with email {$values['email']} is exist!",
+                "user with email {$values['email']} is exist.",
                 400);
         }
 

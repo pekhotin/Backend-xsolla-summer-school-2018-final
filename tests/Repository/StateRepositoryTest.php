@@ -203,7 +203,7 @@ class StateRepositoryTest extends XmlTestCase
         ];
         $result [] = [
             1,
-            '2018-09-26',
+            '2018-09-28',
             $values
 
         ];
@@ -423,6 +423,7 @@ class StateRepositoryTest extends XmlTestCase
 
         return $result;
     }
+
     public function testAddProducts()
     {
         if (self::$stateRepository === null) {
