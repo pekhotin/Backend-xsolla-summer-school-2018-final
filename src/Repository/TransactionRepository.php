@@ -8,6 +8,8 @@ class TransactionRepository extends AbstractRepository
 {
     /**
      * @param Transaction[] $transactions
+     *
+     * @return Transaction[]
      */
     public function insert($transactions)
     {
@@ -19,6 +21,7 @@ class TransactionRepository extends AbstractRepository
 
             $transaction->setId((int)$this->dbConnection->lastInsertId());
         }
+        return $transactions;
     }
     /**
      * @param int $warehouseId
