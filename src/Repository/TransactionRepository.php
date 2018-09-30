@@ -18,7 +18,6 @@ class TransactionRepository extends AbstractRepository
                 'Transactions',
                 $transaction->getTransactionArray()
             );
-
             $transaction->setId((int)$this->dbConnection->lastInsertId());
         }
         return $transactions;
