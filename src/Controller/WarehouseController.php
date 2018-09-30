@@ -357,12 +357,18 @@ class WarehouseController extends BaseController
         foreach ($bodyParams as $param) {
             $values = $this->validator->movementProductsData($param);
 
+            if ($values['warehouseId'] === $warehouseId) {
+                throw new \LogicException(
+                    "It is not possible to move to the same warehouse.",
+                    400
+                );
+            }
             $newWarehouse = $this->warehouseService->getOne($values['warehouseId'], $this->user->getId());
 
             $product = $this->productService->getOneBySku($values['sku'], $this->user->getId());
             if ($product === null) {
                 throw new \LogicException(
-                    "product with sku {$values['sku']} not found!",
+                    "product with sku {$values['sku']} not found.",
                     400
                 );
             }

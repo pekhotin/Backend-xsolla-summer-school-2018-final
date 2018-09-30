@@ -162,7 +162,7 @@ class BaseValidatorTest extends TestCase
             '15-09-2018',
             'date',
             'testDate',
-            '15-09-2018'
+            '2018-09-15'
         ];
 
         $result[] = [
