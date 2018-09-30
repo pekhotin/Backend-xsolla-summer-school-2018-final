@@ -72,7 +72,7 @@ class BaseValidator
                 return (float)$var;
             case 'date':
                 $date = date_parse_from_format('Y-m-d', trim($var));
-                if(checkdate($date['month'], $date['day'], $date['year']) === false) {
+                if (checkdate($date['month'], $date['day'], $date['year']) === false) {
                     throw new \InvalidArgumentException(
                         "date format is not 'Y-m-d'.",
                         400
