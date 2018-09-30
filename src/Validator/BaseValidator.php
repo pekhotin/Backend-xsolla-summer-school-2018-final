@@ -11,10 +11,6 @@ class BaseValidator
      */
     protected $jsonSchemaValidator;
     /**
-     * @var array
-     */
-    protected $data;
-    /**
      * @var string
      */
     protected $schemaPath;
@@ -26,7 +22,7 @@ class BaseValidator
         $this->jsonSchemaValidator = new JsonSchemaValidator(new Validator());
     }
     /**
-     * @param $var
+     * @param mixed $var
      * @param string $type
      * @param string $name
      * @return float|int|null|string
@@ -71,14 +67,14 @@ class BaseValidator
                 }
                 return (float)$var;
             case 'date':
-                $date = date_parse_from_format('Y-m-d', trim($var));
-                if(checkdate($date['month'], $date['day'], $date['year']) === false) {
+                $date = date_create_from_format('Y-m-d', trim($var));
+                if($date === false) {
                     throw new \InvalidArgumentException(
                         "date format is not 'Y-m-d'.",
                         400
                     );
                 }
-                return trim($var);
+                return date_format($date, 'Y-m-d');
             case 'phone':
                 //скобки, тире и пробелы можно, буквы нельзя
                 if (preg_match('/^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/', $var) === 0) {
