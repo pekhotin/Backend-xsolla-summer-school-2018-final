@@ -119,7 +119,7 @@ class UserController extends BaseController
     {
         $this->initUser($request);
 
-        $this->userService->delete($this->user);
+        $this->userService->delete($this->user->getId());
 
         return $response
             ->withStatus(204)

@@ -162,13 +162,7 @@ class BaseValidatorTest extends TestCase
             '15-09-2018',
             'date',
             'testDate',
-            [
-                'exception' => [
-                    'class' => \InvalidArgumentException::class,
-                    'code' => 400,
-                    'message' => "date format is not 'Y-m-d'."
-                ]
-            ]
+            '15-09-2018'
         ];
 
         $result[] = [

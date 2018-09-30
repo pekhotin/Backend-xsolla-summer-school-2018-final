@@ -6,7 +6,6 @@ use App\Service\StateService;
 use App\Service\TransactionService;
 use App\Service\UserService;
 use App\Validator\ProductValidator;
-use phpDocumentor\Reflection\Types\This;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -75,7 +74,7 @@ class ProductController extends BaseController
             $values['type']
         );
 
-        $this->productService->add($product, $this->user);
+        $this->productService->add($product, $this->user->getId());
 
         return $response->withJson($product->getProductArray(), 201);
     }
@@ -187,7 +186,7 @@ class ProductController extends BaseController
     public function getAllProducts(Request $request, Response $response)
     {
         $this->initUser($request);
-        $products = $this->productService->getAll($this->user);
+        $products = $this->productService->getAll($this->user->getId());
         $productsArray = [];
 
         foreach ($products as $product) {

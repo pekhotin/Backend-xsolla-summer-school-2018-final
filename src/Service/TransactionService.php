@@ -22,10 +22,12 @@ class TransactionService
     }
     /**
      * @param Transaction[] $transactions
+     *
+     * @return Transaction[]
      */
     public function add($transactions)
     {
-        $this->transactionRepository->insert($transactions);
+        return $this->transactionRepository->insert($transactions);
     }
     /**
      * @param int $warehouseId

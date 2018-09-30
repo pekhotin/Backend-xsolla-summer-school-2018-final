@@ -39,7 +39,7 @@ class StateRepositoryTest extends XmlTestCase
     }
 
     /**
-     * @dataProvider dataLastTodayQuantity
+     * @dataProvider dataGetLastTodayQuantity
      */
     public function testGetLastQuantity($warehouseId, $productId, $expectedValue)
     {
@@ -51,7 +51,7 @@ class StateRepositoryTest extends XmlTestCase
         $this->assertEquals($value, $expectedValue);
     }
 
-    public function dataLastTodayQuantity()
+    public function dataGetLastTodayQuantity()
     {
         return [
             [1, 8, 250],
@@ -121,13 +121,13 @@ class StateRepositoryTest extends XmlTestCase
     /**
      * @dataProvider dataGetResiduesByWarehouse
      */
-    public function testGetResiduesByWarehouse($warehouseId, $data, $expectedValue)
+    public function testGetResiduesByWarehouse($warehouseId, $date, $expectedValue)
     {
         if (self::$stateRepository === null) {
             self::$stateRepository = new StateRepository($this->dbal);
         }
 
-        $value = self::$stateRepository->getResiduesByWarehouse($warehouseId, $data);
+        $value = self::$stateRepository->getResiduesByWarehouse($warehouseId, $date);
         $this->assertEquals($value, $expectedValue);
     }
 

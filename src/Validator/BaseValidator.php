@@ -78,7 +78,7 @@ class BaseValidator
                         400
                     );
                 }
-                return trim($var);
+                return "{$date['year']}-{$date['month']}-{$date['day']}";
             case 'phone':
                 //скобки, тире и пробелы можно, буквы нельзя
                 if (preg_match('/^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/', $var) === 0) {

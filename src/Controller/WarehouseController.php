@@ -82,7 +82,7 @@ class WarehouseController extends BaseController
             $values['capacity']
         );
 
-        $this->warehouseService->add($warehouse, $this->user);
+        $this->warehouseService->add($warehouse, $this->user->getId());
 
         return $response->withJson($warehouse->getWarehouseArray(), 201);
     }
@@ -132,7 +132,7 @@ class WarehouseController extends BaseController
             $values['capacity']
         );
 
-        $warehouse = $this->warehouseService->update($warehouse, $this->user);
+        $warehouse = $this->warehouseService->update($warehouse, $this->user->getId());
 
         return $response->withJson($warehouse->getWarehouseArray(), 200);
     }
@@ -200,7 +200,7 @@ class WarehouseController extends BaseController
     public function getAllWarehouses(Request $request, Response $response)
     {
         $this->initUser($request);
-        $warehouses = $this->warehouseService->getAll($this->user);
+        $warehouses = $this->warehouseService->getAll($this->user->getId());
         $warehousesArray = [];
 
         foreach ($warehouses as $warehouse) {

@@ -71,12 +71,14 @@ class UserService
         return $this->userRepository->update($user, $values);
     }
     /**
-     * @param User $user
+     * @param int $userId
+     *
+     * @return null
      *
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function delete(User $user)
+    public function delete($userId)
     {
-        $this->userRepository->delete($user->getId());
+        return $this->userRepository->delete($userId);
     }
 }

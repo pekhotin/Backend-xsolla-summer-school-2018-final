@@ -21,13 +21,13 @@ class WarehouseService
         $this->warehouseRepository = $warehouseRepository;
     }
     /**
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse[]
      */
-    public function getAll(User $user)
+    public function getAll(int $userId)
     {
-        return $this->warehouseRepository->getAll($user->getId());
+        return $this->warehouseRepository->getAll($userId);
     }
     /**
      * @param int $id
@@ -35,7 +35,7 @@ class WarehouseService
      *
      * @return Warehouse|null
      */
-    public function getOne($id, int $userId)
+    public function getOne(int $id, int $userId)
     {
         return $this->warehouseRepository->findById($id, $userId);
     }
@@ -51,11 +51,13 @@ class WarehouseService
     }
     /**
      * @param Warehouse $warehouse
-     * @param User $user
+     * @param int $userId
+     *
+     * @return Warehouse
      */
-    public function add(Warehouse $warehouse, User $user)
+    public function add(Warehouse $warehouse, int $userId)
     {
-        $this->warehouseRepository->insert($warehouse, $user->getId());
+        return $this->warehouseRepository->insert($warehouse, $userId);
     }
     /**
      * @param int $warehouseId
@@ -70,12 +72,12 @@ class WarehouseService
     }
     /**
      * @param Warehouse $warehouse
-     * @param User $user
+     * @param int $userId
      *
      * @return Warehouse
      */
-    public function update(Warehouse $warehouse, User $user)
+    public function update(Warehouse $warehouse, int $userId)
     {
-        return $this->warehouseRepository->update($warehouse, $user->getId());
+        return $this->warehouseRepository->update($warehouse, $userId);
     }
 }

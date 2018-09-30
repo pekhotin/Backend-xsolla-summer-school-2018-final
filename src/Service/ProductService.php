@@ -22,13 +22,13 @@ class ProductService
         $this->productRepository = $productRepository;
     }
     /**
-     * @param User $user
+     * @param int $userId
      *
      * @return Product[]
      */
-    public function getAll(User $user)
+    public function getAll($userId)
     {
-        return $this->productRepository->getAll($user->getId());
+        return $this->productRepository->getAll($userId);
     }
 
     /**
@@ -43,13 +43,13 @@ class ProductService
     }
     /**
      * @param Product $product
-     * @param User $user
+     * @param int $userId
      *
      * @return Product
      */
-    public function add(Product $product, User $user)
+    public function add(Product $product, int $userId)
     {
-        return $this->productRepository->insert($product, $user->getId());
+        return $this->productRepository->insert($product, $userId);
     }
     /**
      * @param int $productId
