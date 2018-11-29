@@ -25,6 +25,7 @@
 ```json
 {
     "login": "Toma",
+    "password": "qwerty123",
     "name": "Tamara",
     "surname": "Vedenina",
     "organization": "PSU",
